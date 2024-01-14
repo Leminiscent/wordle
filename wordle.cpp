@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdlib>
 #include <ctime>
+#include <unordered_map>
 
 // each text file contains 1000 words
 #define LISTSIZE 1000
@@ -116,49 +117,36 @@ std::string get_guess(int wordsize)
     return guess;
 }
 
-int check_word(std::string guess, int wordsize, int status[], std::string choice)
+int check_word(const std::string &guess, const std::string &choice, std::vector<int> &status)
 {
     int score = 0;
+    std::unordered_map<char, int> letter_counts;
 
-    // check for exact matches
-    for (int i = 0; i < wordsize; i++)
+    // Count the letters in the choice
+    for (char c : choice)
+    {
+        letter_counts[c]++;
+    }
+
+    // First pass for exact matches
+    for (int i = 0; i < guess.size(); ++i)
     {
         if (guess[i] == choice[i])
         {
             status[i] = EXACT;
-        }
-    }
-
-    // check for close matches
-    for (int i = 0; i < wordsize; i++)
-    {
-        if (status[i] == EXACT)
-        {
             score += EXACT;
-            continue;
-        }
-
-        // if the letter is in the word, but not in the right place, mark it as close
-        for (int j = 0; j < wordsize; j++)
-        {
-            if (guess[i] == choice[j] && status[j] != EXACT)
-            {
-                status[i] = CLOSE;
-                break;
-            }
+            letter_counts[guess[i]]--;
         }
     }
 
-    // check for wrong matches
-    for (int i = 0; i < wordsize; i++)
+    // Second pass for close matches
+    for (int i = 0; i < guess.size(); ++i)
     {
-        if (status[i] == CLOSE)
+        if (status[i] != EXACT && letter_counts[guess[i]] > 0)
         {
+            status[i] = CLOSE;
             score += CLOSE;
-        }
-        else if (status[i] != EXACT)
-        {
-            status[i] = WRONG;
+            letter_counts[guess[i]]--;
         }
     }
 
