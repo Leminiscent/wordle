@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <string>
 #include <random>
@@ -33,14 +34,20 @@ int main(int argc, char *argv[])
 
     // open correct file, each file has exactly LISTSIZE words
     int wordsize = std::stoi(argv[1]);
+
     if (wordsize < 5 || wordsize > 8)
     {
         std::cout << "Error: wordsize must be either 5, 6, 7, or 8" << std::endl;
         return 1;
     }
 
-    std::string wl_filename = std::to_string(wordsize) + ".txt";
+    std::ostringstream filename_stream;
+
+    filename_stream << wordsize << ".txt";
+
+    std::string wl_filename = filename_stream.str();
     std::ifstream wordlist(wl_filename);
+
     if (!wordlist)
     {
         std::cout << "Error opening file " << wl_filename << "." << std::endl;
