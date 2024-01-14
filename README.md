@@ -1,2 +1,2 @@
 # wordle
- lightweight Wordle-Like game using C++ and FLTK
+ lightweight Wordle-Like game using Python and PyGame
