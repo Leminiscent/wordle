@@ -95,7 +95,7 @@ class WordleGame:
 
 
 def main():
-    wordsize = input("Enter the word size (5-8): ")
+    wordsize = input("Enter desired word size (5-8) to start: ")
     try:
         wordsize = int(wordsize)
         game = WordleGame(wordsize)
