@@ -36,45 +36,35 @@ class WordlePygame:
 
         # Button dimensions and positions
         button_width, button_height = 100, 50
-        start_x, start_y = WINDOW_WIDTH / 2 - button_width / 2, 200
+        grid_start_x, grid_start_y = WINDOW_WIDTH / 2 - button_width - 10, 200
         button_gap = 60
 
         # Drawing buttons for word sizes and quit
         word_sizes = [5, 6, 7, 8]
         buttons = {}
         for i, size in enumerate(word_sizes):
-            button_rect = pygame.Rect(
-                start_x,
-                start_y + i * (button_height + button_gap),
-                button_width,
-                button_height,
-            )
-            buttons[
-                (
-                    start_x,
-                    start_y + i * (button_height + button_gap),
-                    button_width,
-                    button_height,
-                )
-            ] = size
+            button_x = grid_start_x + (i % 2) * (button_width + 10)
+            button_y = grid_start_y + (i // 2) * (button_height + 10)
+            button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
+            buttons[(button_x, button_y, button_width, button_height)] = size
             pygame.draw.rect(self.screen, BLACK, button_rect, 2)
             button_text = FONT.render(str(size), True, BLACK)
             self.screen.blit(
                 button_text,
                 (
-                    start_x + button_width / 2 - button_text.get_width() / 2,
-                    start_y
-                    + i * (button_height + button_gap)
-                    + button_height / 2
-                    - button_text.get_height() / 2,
+                    button_x + button_width / 2 - button_text.get_width() / 2,
+                    button_y + button_height / 2 - button_text.get_height() / 2,
                 ),
             )
 
-        # Quit button
+        # Quit button positioned under the 2x2 grid
+        quit_button_x, quit_button_y = grid_start_x, grid_start_y + 2 * (
+            button_height + 10
+        )
         quit_button = pygame.Rect(
-            start_x,
-            start_y + 4 * (button_height + button_gap),
-            button_width,
+            quit_button_x,
+            quit_button_y,
+            2 * button_width + 10,  # Width to span the entire grid width
             button_height,
         )
         pygame.draw.rect(self.screen, BLACK, quit_button, 2)
@@ -82,11 +72,8 @@ class WordlePygame:
         self.screen.blit(
             quit_text,
             (
-                start_x + button_width / 2 - quit_text.get_width() / 2,
-                start_y
-                + 4 * (button_height + button_gap)
-                + button_height / 2
-                - quit_text.get_height() / 2,
+                quit_button_x + quit_button.width / 2 - quit_text.get_width() / 2,
+                quit_button_y + button_height / 2 - quit_text.get_height() / 2,
             ),
         )
 
@@ -104,8 +91,7 @@ class WordlePygame:
                         self.current_screen = "game_screen"
                         return
                 if quit_button.collidepoint(mouse_pos):
-                    pygame.quit()
-                    sys.exit()
+                    self.display_message("Goodbye!", 2000)  # Display goodbye message
 
         pygame.display.update()
 
@@ -142,10 +128,10 @@ class WordlePygame:
                                     == self.wordle_game.EXACT
                                     * self.wordle_game.wordsize
                                 ):
-                                    self.display_result("You won!")
+                                    self.display_message("You won!")
                                     return
                                 elif self.wordle_game.guesses == 0:
-                                    self.display_result(
+                                    self.display_message(
                                         f"The word was {self.wordle_game.choice}. You lost!"
                                     )
                                     return
@@ -198,22 +184,33 @@ class WordlePygame:
                 letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
                 self.screen.blit(letter_surface, (letter_x, letter_y))
 
-    def display_result(self, message):
-        # Display the result message
-        result_msg = FONT.render(message, True, BLACK)
+    def display_message(self, message, wait_time=None):
+        """Display a message at the center of the screen.
+
+        Args:
+        message (str): The message to display.
+        wait_time (int, optional): Time in milliseconds to wait. If None, returns to main menu after displaying the message.
+        """
+        self.screen.fill(WHITE)
+        msg_surface = FONT.render(message, True, BLACK)
         self.screen.blit(
-            result_msg,
+            msg_surface,
             (
-                WINDOW_WIDTH / 2 - result_msg.get_width() / 2,
-                WINDOW_HEIGHT / 2 - result_msg.get_height() / 2,
+                WINDOW_WIDTH / 2 - msg_surface.get_width() / 2,
+                WINDOW_HEIGHT / 2 - msg_surface.get_height() / 2,
             ),
         )
         pygame.display.update()
 
-        # Wait for a few seconds and return to the main menu
-        pygame.time.wait(2000)
-        self.current_screen = "main_menu"
-        self.run()
+        if wait_time is not None:
+            pygame.time.wait(wait_time)  # Wait for the specified time
+            if wait_time == 2000:  # Specific case for quitting after "Goodbye!"
+                pygame.quit()
+                sys.exit()
+        else:
+            pygame.time.wait(2000)
+            self.current_screen = "main_menu"
+            self.run()
 
     def run(self):
         while True:
