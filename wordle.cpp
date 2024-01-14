@@ -7,18 +7,18 @@
 #include <unordered_map>
 
 // each text file contains 1000 words
-#define LISTSIZE 1000
+constexpr int LISTSIZE = 1000;
 
 // values for colors and score (EXACT == right letter, right place; CLOSE == right letter, wrong place; WRONG == wrong letter)
-#define EXACT 2
-#define CLOSE 1
-#define WRONG 0
+constexpr int EXACT = 2;
+constexpr int CLOSE = 1;
+constexpr int WRONG = 0;
 
 // ANSI color codes for boxed in letters
-#define GREEN "\e[38;2;255;255;255;1m\e[48;2;106;170;100;1m"
-#define YELLOW "\e[38;2;255;255;255;1m\e[48;2;201;180;88;1m"
-#define RED "\e[38;2;255;255;255;1m\e[48;2;220;20;60;1m"
-#define RESET "\e[0;39m"
+constexpr char GREEN[] = "\e[38;2;255;255;255;1m\e[48;2;106;170;100;1m";
+constexpr char YELLOW[] = "\e[38;2;255;255;255;1m\e[48;2;201;180;88;1m";
+constexpr char RED[] = "\e[38;2;255;255;255;1m\e[48;2;220;20;60;1m";
+constexpr char RESET[] = "\e[0;39m";
 
 std::string get_guess(int wordsize);                                             // get user's guess
 int check_word(std::string guess, std::vector<int> &status, std::string choice); // check guess against the word, update status array
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         wordlist >> options[i];
     }
 
-    // pseudorandomly select a word for this game
+    // pseudorandomly select a word for the current game
     srand(time(nullptr));
     std::string choice = options[rand() % LISTSIZE];
 
@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     int guesses = wordsize + 1;
     bool won = false;
 
-    std::cout << GREEN "This is WORDLE" RESET << std::endl;
+    std::cout << GREEN << "This is WORDLE" << RESET << std::endl;
     std::cout << "You have " << guesses << " tries to guess the " << wordsize << "-letter word I'm thinking of" << std::endl;
 
     // main game loop, one iteration for each guess
