@@ -2,8 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
-#include <cstdlib>
-#include <ctime>
+#include <random>
 #include <unordered_map>
 
 // each text file contains 1000 words
@@ -57,8 +56,10 @@ int main(int argc, char *argv[])
     }
 
     // pseudorandomly select a word for the current game
-    srand(time(nullptr));
-    std::string choice = options[rand() % LISTSIZE];
+    std::random_device rd;                                  // Obtain a random number from hardware
+    std::mt19937 gen(rd());                                 // Seed the generator
+    std::uniform_int_distribution<> distr(0, LISTSIZE - 1); // Define the range
+    std::string choice = options[distr(gen)];               // Generate a random index and select the word
 
     // allow one more guess than the length of the word
     int guesses = wordsize + 1;
