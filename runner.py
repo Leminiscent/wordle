@@ -149,8 +149,9 @@ class WordlePygame:
             self.screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
             pygame.draw.rect(self.screen, BLACK, input_box, 2)
 
-            # Display guess log
+            # Display guess log and guess counter
             self.display_guess_log()
+            self.display_guess_counter()
 
             pygame.display.flip()
             self.clock.tick(30)
@@ -183,6 +184,12 @@ class WordlePygame:
                 letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
                 letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
                 self.screen.blit(letter_surface, (letter_x, letter_y))
+
+    def display_guess_counter(self):
+        """Display the remaining number of guesses."""
+        counter_text = f"Guesses left: {self.wordle_game.guesses}"
+        text_surface = FONT.render(counter_text, True, BLACK)
+        self.screen.blit(text_surface, (10, 10))
 
     def display_message(self, message, wait_time=None):
         """Display a message at the center of the screen.
