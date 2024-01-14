@@ -147,7 +147,8 @@ class WordlePygame:
             width = max(200, txt_surface.get_width() + 10)
             input_box.w = width
             self.screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
-            pygame.draw.rect(self.screen, BLACK, input_box, 2)
+            box_color = GREEN if active else BLACK
+            pygame.draw.rect(self.screen, box_color, input_box, 2)
 
             # Display guess log and guess counter
             self.display_guess_log()
