@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <array>
 #include <string>
 #include <random>
 #include <unordered_map>
@@ -54,8 +55,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    // load word file into a vector of size LISTSIZE
-    std::vector<std::string> options(LISTSIZE);
+    // load word file into an array of size LISTSIZE
+    std::array<std::string, LISTSIZE> options;
 
     for (int i = 0; i < LISTSIZE; i++)
     {
