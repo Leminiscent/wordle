@@ -189,6 +189,10 @@ class WordlePygame:
             pygame.display.flip()
             self.clock.tick(30)
 
+    def dynamic_font_size(self, letter_box_size):
+        """Calculate font size dynamically based on the letter box size."""
+        return int(letter_box_size * 0.95)
+
     def display_guess_log(self):
         # Dynamic adjustment based on word size
         if self.wordle_game.wordsize <= 5:
@@ -231,7 +235,10 @@ class WordlePygame:
                 pygame.draw.rect(self.screen, color, letter_rect)
 
                 # Draw letter
-                letter_surface = FONT.render(letter.upper(), True, TEXT_COLOR)
+                dynamic_font = pygame.font.Font(
+                    OPEN_SANS, self.dynamic_font_size(letter_box_size)
+                )
+                letter_surface = dynamic_font.render(letter.upper(), True, TEXT_COLOR)
                 letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
                 letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
                 self.screen.blit(letter_surface, (letter_x, letter_y))
