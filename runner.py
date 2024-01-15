@@ -144,10 +144,11 @@ class WordlePygame:
             # Input box
             self.screen.fill(WHITE)
             txt_surface = FONT.render(text, True, BLACK)
-            width = max(200, txt_surface.get_width() + 10)
-            input_box.w = width
-            self.screen.blit(txt_surface, (input_box.x + 5, input_box.y + 5))
-            box_color = GREEN if active else BLACK
+            # Align text in the center of the input box
+            text_x = input_box.x + (input_box.width - txt_surface.get_width()) / 2
+            text_y = input_box.y + (input_box.height - txt_surface.get_height()) / 2
+            self.screen.blit(txt_surface, (text_x, text_y))
+            box_color = GREEN if active else BLACK  # Change color when active
             pygame.draw.rect(self.screen, box_color, input_box, 2)
 
             # Display guess log and guess counter
