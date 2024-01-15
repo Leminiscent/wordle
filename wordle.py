@@ -96,6 +96,12 @@ class WordleGame:
 
         for i in range(self.guesses):
             guess = self.get_guess()
+
+            # Check if the guess is a valid word
+            if not self.is_valid_word(guess):
+                print("Not a valid word. Try again.")
+                continue
+
             score, status = self.check_word(guess)
 
             print(f"Guess {i + 1}: ", end="")
