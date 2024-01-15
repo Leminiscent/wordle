@@ -142,16 +142,19 @@ class WordlePygame:
                                     text = ""
                                     continue
 
-                                # Check if guess is in word list
-                                if guess not in self.wordle_game.wordList.options:
-                                    self.display_message("Word not in list!", 500)
-                                    text = ""
-                                    continue
-
+                                # Check the guess and update guess log
                                 score, status = self.wordle_game.check_word(guess)
                                 self.guess_log.append((guess, status))
                                 text = ""  # Reset text
                                 self.wordle_game.guesses -= 1
+
+                                # Update the guess log and guess counter display
+                                self.screen.fill(BACKGROUND_COLOR)
+                                self.display_guess_log()
+                                self.display_guess_counter()
+                                pygame.display.flip()
+
+                                # Check for win or lose conditions
                                 if (
                                     score
                                     == self.wordle_game.EXACT
@@ -164,6 +167,7 @@ class WordlePygame:
                                         f"The word was {self.wordle_game.choice}. You lost!"
                                     )
                                     return
+
                         elif event.key == pygame.K_BACKSPACE:
                             text = text[:-1]
                         else:
@@ -259,10 +263,7 @@ class WordlePygame:
         msg_surface = FONT.render(message, True, TEXT_COLOR)
         self.screen.blit(
             msg_surface,
-            (
-                WINDOW_WIDTH / 2 - msg_surface.get_width() / 2,
-                WINDOW_HEIGHT / 2 - msg_surface.get_height() / 2,
-            ),
+            (WINDOW_WIDTH / 2 - msg_surface.get_width() / 2, 350),
         )
         pygame.display.update()
         if wait_time is not None:
