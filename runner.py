@@ -88,6 +88,7 @@ class WordlePygame:
                     button_rect = pygame.Rect(*button_key)
                     if button_rect.collidepoint(mouse_pos):
                         self.wordle_game = WordleGame(size)
+                        self.guess_log = []
                         self.current_screen = "game_screen"
                         return
                 if quit_button.collidepoint(mouse_pos):
@@ -100,7 +101,7 @@ class WordlePygame:
         # Input box setup
         input_box = pygame.Rect(WINDOW_WIDTH / 2 - 100, 50, 200, 40)
         text = ""
-        active = False  # Active state of input box
+        active = True  # Active state of input box
 
         while True:
             for event in pygame.event.get():
