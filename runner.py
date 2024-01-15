@@ -106,6 +106,7 @@ class WordlePygame:
                         self.current_screen = "game_screen"
                         return
                 if quit_button.collidepoint(mouse_pos):
+                    self.screen.fill(BACKGROUND_COLOR)
                     self.display_message("Goodbye!", 2000)  # Display goodbye message
 
         pygame.display.update()
@@ -134,6 +135,19 @@ class WordlePygame:
                             # Process guess
                             guess = text.lower()
                             if len(guess) == self.wordle_game.wordsize:
+                                if not guess.isalpha():
+                                    self.display_message(
+                                        "Invalid input! Use only letters.", 500
+                                    )
+                                    text = ""
+                                    continue
+
+                                # Check if guess is in word list
+                                if guess not in self.wordle_game.wordList.options:
+                                    self.display_message("Word not in list!", 500)
+                                    text = ""
+                                    continue
+
                                 score, status = self.wordle_game.check_word(guess)
                                 self.guess_log.append((guess, status))
                                 text = ""  # Reset text
@@ -235,7 +249,6 @@ class WordlePygame:
         message (str): The message to display.
         wait_time (int, optional): Time in milliseconds to wait. If None, returns to main menu after displaying the message.
         """
-        self.screen.fill(BACKGROUND_COLOR)
         msg_surface = FONT.render(message, True, TEXT_COLOR)
         self.screen.blit(
             msg_surface,
@@ -245,7 +258,6 @@ class WordlePygame:
             ),
         )
         pygame.display.update()
-
         if wait_time is not None:
             pygame.time.wait(wait_time)  # Wait for the specified time
             if wait_time == 2000:  # Specific case for quitting after "Goodbye!"
