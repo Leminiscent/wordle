@@ -159,7 +159,8 @@ class WordlePygame:
             self.clock.tick(30)
 
     def display_guess_log(self):
-        log_start_x, log_start_y = 50, 100  # Starting position of the guess log
+        log_start_x = WINDOW_WIDTH - 250
+        log_start_y = 50
         letter_box_size = 40  # Size of each letter box
         spacing = 5  # Spacing between boxes
 
