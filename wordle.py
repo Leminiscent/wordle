@@ -1,4 +1,5 @@
 import random
+import requests
 
 
 class WordList:
@@ -59,6 +60,22 @@ class WordleGame:
                 letter_counts[char] -= 1
 
         return score, status
+
+    def is_valid_word(self, word):
+        """
+        Check if a word is valid by querying the dictionary API.
+        """
+        try:
+            response = requests.get(
+                f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+            )
+            if response.status_code == 200:
+                return True
+            else:
+                return False
+        except requests.RequestException:
+            print("Error: Unable to connect to the dictionary API.")
+            return False
 
     def print_word(self, guess, status):
         for i in range(self.wordsize):
