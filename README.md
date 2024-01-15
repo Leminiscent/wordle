@@ -2,14 +2,14 @@
 
 This repository contains two Python scripts to play a Wordle-like game. The first script (`wordle.py`) implements a console-based version of the game, while the second script (`runner.py`) provides a graphical user interface using Pygame.
 
+![WORDLE_GUI](wordle_gui.webp)
+
 ## Files
 
 - `wordle.py`: A console-based implementation of the Wordle game.
 - `runner.py`: A Pygame-based graphical version of the Wordle game.
 
 ## wordle.py
-
-![WORDLE_GUI](wordle_gui.webp)
 
 ### Description
 
