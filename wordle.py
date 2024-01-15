@@ -35,6 +35,7 @@ class WordleGame:
         self.wordList = WordList(wordsize)
         self.choice = self.wordList.get_random_word()
         self.guesses = wordsize + 1
+        self.api_available = True
 
     def get_guess(self):
         guess = ""
@@ -65,21 +66,27 @@ class WordleGame:
         """
         Check if a word is valid by querying the dictionary API.
         """
+        if not self.api_available:
+            # Skip API validation if it's marked as unavailable
+            return True
+
         url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
         try:
-            response = requests.get(url, timeout=5)  # Set a timeout of 5 seconds
+            response = requests.get(url, timeout=5)
             if response.status_code == 200:
                 return True
             else:
                 return False
-        except requests.Timeout:
-            print("Warning: Dictionary API request timed out. Guess not validated.")
-            return True  # Allow the guess in case of a timeout
-        except requests.RequestException:
+        except (requests.Timeout, requests.RequestException) as e:
+            # Handle timeout and other request-related exceptions
+            print(f"Warning: Unable to validate words using the dictionary API ({e}).")
             print(
-                "Error: Unable to connect to the dictionary API. Check your internet connection."
+                "Continuing without word validation. Please restart the program to try reconnecting."
             )
-            return True  # Allow the guess in case of other network errors
+            self.api_available = (
+                False  # Disable API validation for the rest of the session
+            )
+            return True
 
     def print_word(self, guess, status):
         for i in range(self.wordsize):
