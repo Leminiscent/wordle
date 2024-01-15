@@ -9,6 +9,8 @@ This repository contains two Python scripts to play a Wordle-like game. The firs
 
 ## wordle.py
 
+![WORDLE_GUI](wordle_gui.webp)
+
 ### Description
 
 This script defines two classes, `WordList` and `WordleGame`, to manage the word list and game logic, respectively.
