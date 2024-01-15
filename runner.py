@@ -142,6 +142,14 @@ class WordlePygame:
                                     text = ""
                                     continue
 
+                                # Check if the guess is a valid word
+                                if not self.wordle_game.is_valid_word(guess):
+                                    self.display_message(
+                                        "Not a valid word. Try again.", 500
+                                    )
+                                    text = ""
+                                    continue
+
                                 # Check the guess and update guess log
                                 score, status = self.wordle_game.check_word(guess)
                                 self.guess_log.append((guess, status))
