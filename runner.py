@@ -160,10 +160,27 @@ class WordlePygame:
             self.clock.tick(30)
 
     def display_guess_log(self):
-        log_start_x = WINDOW_WIDTH - 250
-        log_start_y = 50
-        letter_box_size = 40  # Size of each letter box
-        spacing = 5  # Spacing between boxes
+        # Dynamic adjustment based on word size
+        if self.wordle_game.wordsize <= 5:
+            letter_box_size = 40
+            spacing = 5
+        elif self.wordle_game.wordsize == 6:
+            letter_box_size = 35
+            spacing = 4
+        elif self.wordle_game.wordsize == 7:
+            letter_box_size = 30
+            spacing = 3
+        else:
+            letter_box_size = 25
+            spacing = 2
+
+        # Calculate the starting position dynamically
+        total_width = (
+            self.wordle_game.wordsize * letter_box_size
+            + (self.wordle_game.wordsize - 1) * spacing
+        )
+        log_start_x = WINDOW_WIDTH - total_width - 50  # Adjust for right alignment
+        log_start_y = 50  # Starting position of the guess log
 
         for guess_index, (guess, status) in enumerate(self.guess_log):
             for letter_index, letter in enumerate(guess):
