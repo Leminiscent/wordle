@@ -142,11 +142,20 @@ class WordlePygame:
                                     text = ""
                                     continue
 
-                                # Check if the guess is a valid word
+                                # Check if the guess is a valid word, considering API availability
                                 if not self.wordle_game.is_valid_word(guess):
-                                    self.display_message(
-                                        "Not a valid word. Try again.", 500
-                                    )
+                                    if self.wordle_game.api_available:
+                                        # If the API is available but the word is invalid
+                                        self.display_message(
+                                            "Not a valid word. Try again.", 500
+                                        )
+                                    else:
+                                        # If the API is not available
+                                        self.display_message(
+                                            "Guess accepted. API currently unavailable.",
+                                            500,
+                                        )
+
                                     text = ""
                                     continue
 
@@ -262,17 +271,25 @@ class WordlePygame:
         self.screen.blit(text_surface, (10, 10))
 
     def display_message(self, message, wait_time=None):
-        """Display a message at the center of the screen.
+        """Display a message at the center of the screen and API status if needed.
 
         Args:
         message (str): The message to display.
         wait_time (int, optional): Time in milliseconds to wait. If None, returns to main menu after displaying the message.
         """
+        # Display the main message
         msg_surface = FONT.render(message, True, TEXT_COLOR)
         self.screen.blit(
             msg_surface,
             (WINDOW_WIDTH / 2 - msg_surface.get_width() / 2, 350),
         )
+
+        # Display API status if the API is unavailable
+        if not self.wordle_game.api_available:
+            api_status_text = "API unavailable: Continuing without word validation."
+            status_surface = FONT.render(api_status_text, True, TEXT_COLOR)
+            self.screen.blit(status_surface, (10, WINDOW_HEIGHT - 30))
+
         pygame.display.update()
         if wait_time is not None:
             pygame.time.wait(wait_time)  # Wait for the specified time
