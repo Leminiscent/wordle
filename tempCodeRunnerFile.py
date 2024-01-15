@@ -6,14 +6,11 @@ pygame.init()
 
 # Constants
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
-BACKGROUND_COLOR = (242, 242, 242)  # Light Grey
-TEXT_COLOR = (48, 71, 94)  # Dark Blue
-BUTTON_COLOR = (100, 181, 246)  # Light Blue
-BUTTON_HOVER_COLOR = (41, 182, 246)  # Brighter Blue
-INPUT_OUTLINE_COLOR = (224, 224, 224)  # Light Grey
-CORRECT_GUESS_COLOR = (129, 199, 132)  # Soft CORRECT_GUESS_COLOR
-CLOSE_GUESS_COLOR = (255, 235, 59)  # Muted CLOSE_GUESS_COLOR
-INCORRECT_GUESS_COLOR = (239, 83, 80)  # Soft INCORRECT_GUESS_COLOR
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GREEN = (0, 255, 0)
+YELLOW = (255, 255, 0)
+RED = (255, 0, 0)
 OPEN_SANS = "assets/fonts/OpenSans-Regular.ttf"
 FONT = pygame.font.Font(OPEN_SANS, 36)
 
@@ -29,9 +26,9 @@ class WordlePygame:
         self.guess_log = []
 
     def main_menu(self):
-        self.screen.fill(BACKGROUND_COLOR)
-        title = FONT.render("Wordle", True, TEXT_COLOR)
-        instructions = FONT.render("Choose your word size to start", True, TEXT_COLOR)
+        self.screen.fill(WHITE)
+        title = FONT.render("Wordle", True, BLACK)
+        instructions = FONT.render("Choose your word size to start", True, BLACK)
         self.screen.blit(title, (WINDOW_WIDTH / 2 - title.get_width() / 2, 50))
         self.screen.blit(
             instructions, (WINDOW_WIDTH / 2 - instructions.get_width() / 2, 100)
@@ -50,9 +47,8 @@ class WordlePygame:
             button_y = grid_start_y + (i // 2) * (button_height + 10)
             button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
             buttons[(button_x, button_y, button_width, button_height)] = size
-            pygame.draw.rect(self.screen, BUTTON_COLOR, button_rect)
-            pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, button_rect, 2)
-            button_text = FONT.render(str(size), True, TEXT_COLOR)
+            pygame.draw.rect(self.screen, BLACK, button_rect, 2)
+            button_text = FONT.render(str(size), True, BLACK)
             self.screen.blit(
                 button_text,
                 (
@@ -71,9 +67,8 @@ class WordlePygame:
             2 * button_width + 10,  # Width to span the entire grid width
             button_height,
         )
-        pygame.draw.rect(self.screen, BUTTON_COLOR, quit_button)
-        pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, quit_button, 2)
-        quit_text = FONT.render("Quit", True, TEXT_COLOR)
+        pygame.draw.rect(self.screen, BLACK, quit_button, 2)
+        quit_text = FONT.render("Quit", True, BLACK)
         self.screen.blit(
             quit_text,
             (
@@ -102,7 +97,7 @@ class WordlePygame:
         pygame.display.update()
 
     def game_screen(self):
-        self.screen.fill(BACKGROUND_COLOR)
+        self.screen.fill(WHITE)
         # Input box setup
         input_box = pygame.Rect(WINDOW_WIDTH / 2 - 100, 50, 200, 40)
         text = ""
@@ -148,15 +143,13 @@ class WordlePygame:
                                 text += event.unicode
 
             # Input box
-            self.screen.fill(BACKGROUND_COLOR)
-            txt_surface = FONT.render(text, True, TEXT_COLOR)
+            self.screen.fill(WHITE)
+            txt_surface = FONT.render(text, True, BLACK)
             # Align text in the center of the input box
             text_x = input_box.x + (input_box.width - txt_surface.get_width()) / 2
             text_y = input_box.y + (input_box.height - txt_surface.get_height()) / 2
             self.screen.blit(txt_surface, (text_x, text_y))
-            box_color = (
-                CORRECT_GUESS_COLOR if active else INPUT_OUTLINE_COLOR
-            )  # Change color when active
+            box_color = GREEN if active else BLACK  # Change color when active
             pygame.draw.rect(self.screen, box_color, input_box, 2)
 
             # Display guess log and guess counter
@@ -193,11 +186,11 @@ class WordlePygame:
             for letter_index, letter in enumerate(guess):
                 # Determine the color based on the status
                 if status[letter_index] == self.wordle_game.EXACT:
-                    color = CORRECT_GUESS_COLOR
+                    color = GREEN
                 elif status[letter_index] == self.wordle_game.CLOSE:
-                    color = CLOSE_GUESS_COLOR
+                    color = YELLOW
                 else:
-                    color = INCORRECT_GUESS_COLOR
+                    color = RED
 
                 # Position of each letter box
                 x = log_start_x + letter_index * (letter_box_size + spacing)
@@ -208,7 +201,7 @@ class WordlePygame:
                 pygame.draw.rect(self.screen, color, letter_rect)
 
                 # Draw letter
-                letter_surface = FONT.render(letter.upper(), True, TEXT_COLOR)
+                letter_surface = FONT.render(letter.upper(), True, BLACK)
                 letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
                 letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
                 self.screen.blit(letter_surface, (letter_x, letter_y))
@@ -216,7 +209,7 @@ class WordlePygame:
     def display_guess_counter(self):
         """Display the remaining number of guesses."""
         counter_text = f"Guesses left: {self.wordle_game.guesses}"
-        text_surface = FONT.render(counter_text, True, TEXT_COLOR)
+        text_surface = FONT.render(counter_text, True, BLACK)
         self.screen.blit(text_surface, (10, 10))
 
     def display_message(self, message, wait_time=None):
@@ -226,8 +219,8 @@ class WordlePygame:
         message (str): The message to display.
         wait_time (int, optional): Time in milliseconds to wait. If None, returns to main menu after displaying the message.
         """
-        self.screen.fill(BACKGROUND_COLOR)
-        msg_surface = FONT.render(message, True, TEXT_COLOR)
+        self.screen.fill(WHITE)
+        msg_surface = FONT.render(message, True, BLACK)
         self.screen.blit(
             msg_surface,
             (
