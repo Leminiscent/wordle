@@ -34,6 +34,7 @@ class WordleGame:
         if wordsize < 5 or wordsize > 8:
             raise ValueError("Error: wordsize must be either 5, 6, 7, or 8")
         self.wordsize = wordsize
+        self.guessed_words = set()
         self.validation_cache = cache
         self.wordList = WordList(wordsize, self.validation_cache)
         self.choice = self.wordList.get_random_word()
@@ -113,6 +114,12 @@ class WordleGame:
 
         for _ in range(self.guesses):
             guess = self.get_guess()
+
+            if guess in self.guessed_words:
+                print("You have already guessed this word. Try a different word.")
+                continue
+            self.guessed_words.add(guess)  # Add guess to the set of guessed words
+
             if not self.is_valid_word(guess):
                 print("Not a valid word. Try again.")
                 continue
@@ -121,6 +128,7 @@ class WordleGame:
             score, status = self.check_word(guess)
             print(f"Guess {_ + 1}: ", end="")
             self.print_word(guess, status)
+
             if score == self.EXACT * self.wordsize:
                 print("You won!")
                 return

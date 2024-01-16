@@ -103,6 +103,7 @@ class WordlePygame:
                     button_rect = pygame.Rect(*button_key)
                     if button_rect.collidepoint(mouse_pos):
                         self.wordle_game = WordleGame(size, self.validation_cache)
+                        self.wordle_game.guessed_words = set()
                         self.guess_log = []
                         self.current_screen = "game_screen"
                         return
@@ -138,17 +139,25 @@ class WordlePygame:
                             if len(guess) == self.wordle_game.wordsize:
                                 if not guess.isalpha():
                                     self.display_message(
-                                        "Invalid input! Use only letters.", 500
+                                        "Invalid input! Use only letters.", 750
                                     )
                                     text = ""
                                     continue
+
+                                if guess in self.wordle_game.guessed_words:
+                                    self.display_message(
+                                        "You have already guessed this word.", 750
+                                    )
+                                    text = ""
+                                    continue
+                                self.wordle_game.guessed_words.add(guess)
 
                                 # Check if the guess is a valid word, considering API availability
                                 if not self.wordle_game.is_valid_word(guess):
                                     if self.wordle_game.api_available:
                                         # If the API is available but the word is invalid
                                         self.display_message(
-                                            "Not a valid word. Try again.", 500
+                                            "Not a valid word. Try again.", 750
                                         )
                                     else:
                                         # If the API is not available
