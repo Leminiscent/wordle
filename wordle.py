@@ -43,7 +43,7 @@ class WordleGame:
     def get_guess(self):
         guess = ""
         while len(guess) != self.wordsize:
-            guess = input(f"Input a {self.wordsize}-letter word: ")
+            guess = input(f"Input a {self.wordsize}-letter word: ").strip().lower()
         return guess
 
     def check_word(self, guess):
@@ -77,15 +77,13 @@ class WordleGame:
             # Skip API validation if it's marked as unavailable
             return True
 
-        url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
         try:
-            response = requests.get(url, timeout=5)
-            if response.status_code == 200:
-                self.validation_cache[word] = True
-                return True
-            else:
-                self.validation_cache[word] = False
-                return False
+            response = requests.get(
+                f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}", timeout=5
+            )
+            valid = response.status_code == 200
+            self.validation_cache[word] = valid  # Cache the result
+            return valid
         except (requests.Timeout, requests.RequestException) as e:
             # Handle timeout and other request-related exceptions
             print(f"Warning: Unable to validate words using the dictionary API ({e}).")
@@ -112,29 +110,22 @@ class WordleGame:
         print(
             f"You have {self.guesses} tries to guess the {self.wordsize}-letter word I'm thinking of"
         )
-        won = False
 
-        for i in range(self.guesses):
+        for _ in range(self.guesses):
             guess = self.get_guess()
-
-            # Check if the guess is a valid word
             if not self.is_valid_word(guess):
                 print("Not a valid word. Try again.")
                 continue
 
+            # Check the guess and update the game state
             score, status = self.check_word(guess)
-
-            print(f"Guess {i + 1}: ", end="")
+            print(f"Guess {_ + 1}: ", end="")
             self.print_word(guess, status)
-
             if score == self.EXACT * self.wordsize:
-                won = True
-                break
+                print("You won!")
+                return
 
-        if won:
-            print("You won!")
-        else:
-            print(f"The word was {self.choice}.")
+        print(f"The word was {self.choice}.")
 
 
 def main():
