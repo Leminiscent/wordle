@@ -1,45 +1,55 @@
 # Wordle
-
-This repository contains two Python scripts to play a Wordle-like game. The first script (`wordle.py`) implements a console-based version of the game, while the second script (`runner.py`) provides a graphical user interface using Pygame.
+This repository contains a Python implementation of the popular Wordle game, including both a command-line version and a graphical user interface (GUI) version using Pygame.
 
 ![WORDLE_GUI](wordle_gui.webp)
 
-## Files
+## Description
 
-- `wordle.py`: A console-based implementation of the Wordle game.
-- `runner.py`: A Pygame-based graphical version of the Wordle game.
+The project is divided into two main parts: `WordleGame` and `WordlePygame`. The `WordleGame` class handles the logic and mechanics of the Wordle game, while `WordlePygame` provides a Pygame-based GUI for an enhanced gameplay experience.
 
-## wordle.py
+### `WordleGame`
 
-### Description
+The `WordleGame` class is responsible for managing the core gameplay of Wordle. It allows the player to guess words, checks the accuracy of these guesses, and keeps track of the game's state. Key features include:
 
-This script defines two classes, `WordList` and `WordleGame`, to manage the word list and game logic, respectively.
+- Word validation against a dictionary API.
+- Color-coded feedback for each guess.
+- Tracking of guessed words and remaining attempts.
 
-- `WordList`: Handles loading a word list from a file and selecting a random word.
-- `WordleGame`: Manages the game logic, including word guessing, scoring, and displaying results.
+### `WordlePygame`
 
-### Usage
+The `WordlePygame` class is a Pygame-based graphical interface for the Wordle game. It includes:
 
-To play the console version, run `wordle.py`. You'll be prompted to enter a word size (5 to 8 letters) and then to guess the word.
-
-## runner.py
-
-### Description
-
-This script utilizes the Pygame library to create a graphical user interface for the Wordle game.
-
-- `WordlePygame`: A class that manages the game's UI, including drawing elements on the screen, handling user input, and transitioning between different screens.
-
-### Usage
-
-To play the graphical version, ensure Pygame is installed and run `runner.py`. You can select the word size from the main menu and then play the game using a graphical interface.
+- Main menu with word size selection.
+- Input handling for guesses.
+- Graphical display of guesses and game state.
 
 ## Requirements
 
 - Python 3
-- Pygame (for the graphical version)
+- Pygame library
+- Internet access for word validation (API use)
 
-To install Pygame, run:
+## Installation
 
-```bash
-pip install pygame
+1. Clone the repository or download the source code.
+2. Install Pygame using `pip install pygame` if not already installed.
+3. Run the main script to start the game.
+
+## Usage
+
+### Command-Line Interface
+
+Run `wordle.py` to start the Wordle game in the command line. The game will prompt you to input a word size and then start the guessing game.
+
+### Graphical User Interface
+
+Run `runner.py` to start the Wordle game with a graphical interface. Use the mouse to interact with the on-screen elements.
+
+## Configuration
+
+- The word list can be modified or extended by editing the corresponding `.txt` files.
+- The GUI appearance can be customized by changing the color and font constants in `WordlePygame`.
+
+## Acknowledgments
+
+This implementation was inspired by the original Wordle game and aims to provide a simple yet engaging gameplay experience in Python.
