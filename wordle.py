@@ -3,15 +3,48 @@ import requests
 
 
 class WordList:
+    """
+    A class used to represent a list of words.
+
+    This class handles the loading of a word list from a file and provides
+    functionality to get a random word from this list.
+
+    Attributes:
+        LISTSIZE (int): The number of words to be loaded from the file.
+        wl_filename (str): The name of the file containing the word list.
+        options (list): A list of words loaded from the file.
+        cache (dict): A cache to store words for quick lookup.
+
+    Methods:
+        load_word_list(): Loads words from the file into the list and cache.
+        get_random_word(): Returns a random word from the list.
+    """
+
     LISTSIZE = 1000
 
     def __init__(self, wordsize, cache):
+        """
+        Initializes the WordList with a specific word size and cache.
+
+        Args:
+            wordsize (int): The size of the words to be loaded (e.g., 5 for five-letter words).
+            cache (dict): A cache to store and quickly retrieve words.
+        """
         self.wl_filename = f"{wordsize}.txt"
         self.options = []
         self.cache = cache
         self.load_word_list()
 
     def load_word_list(self):
+        """
+        Loads words from the file into the options list and the cache.
+
+        Reads a fixed number of words from the file specified by wl_filename,
+        adding each word to the options list and the cache for quick access.
+
+        Raises:
+            RuntimeError: If there is an IOError while opening the file.
+        """
         try:
             with open(self.wl_filename, "r") as wordlist:
                 for _ in range(self.LISTSIZE):
@@ -23,11 +56,47 @@ class WordList:
 
 
 class WordleGame:
+    """
+    A class used to represent the Wordle game logic.
+
+    This class manages the core game mechanics, including guessing words,
+    validating guesses, and keeping track of game state.
+
+    Attributes:
+        EXACT (int): Constant value representing an exact letter match.
+        CLOSE (int): Constant value representing a close letter match.
+        WRONG (int): Constant value representing an incorrect letter.
+        wordsize (int): The size of the target word.
+        guessed_words (set): A set of words that have been guessed.
+        validation_cache (dict): A cache for validated words.
+        wordList (WordList): An instance of the WordList class.
+        choice (str): The target word for the current game.
+        guesses (int): The number of guesses allowed.
+        api_available (bool): Flag to indicate if the dictionary API is available.
+
+    Methods:
+        get_guess(): Prompts the user to input a guess.
+        check_word(guess): Checks the guess against the target word.
+        is_valid_word(word): Validates if a word is in the dictionary.
+        print_word(guess, status): Prints the guess with color-coded feedback.
+        start(): Starts the main game loop.
+    """
+
     EXACT = 2
     CLOSE = 1
     WRONG = 0
 
     def __init__(self, wordsize, cache):
+        """
+        Initializes the WordleGame with a specific word size and cache.
+
+        Args:
+            wordsize (int): The size of the target word.
+            cache (dict): A cache for storing and retrieving validated words.
+
+        Raises:
+            ValueError: If the wordsize is not between 5 and 8 inclusive.
+        """
         if wordsize < 5 or wordsize > 8:
             raise ValueError("Error: wordsize must be either 5, 6, 7, or 8")
         self.wordsize = wordsize
@@ -39,12 +108,32 @@ class WordleGame:
         self.api_available = True
 
     def get_guess(self):
+        """
+        Prompts the user to input a guess of the correct word size.
+
+        Continuously prompts until a word of the correct length is input.
+
+        Returns:
+            str: The user's guessed word.
+        """
         guess = ""
         while len(guess) != self.wordsize:
             guess = input(f"Input a {self.wordsize}-letter word: ").strip().lower()
         return guess
 
     def check_word(self, guess):
+        """
+        Compares the guess to the target word and generates a score and status list.
+
+        The method compares each letter of the guess to the target word and assigns
+        a status (EXACT, CLOSE, WRONG) to each letter. It also calculates a total score.
+
+        Args:
+            guess (str): The guessed word.
+
+        Returns:
+            tuple: A tuple containing the total score and a list of status for each letter.
+        """
         status = [self.WRONG] * self.wordsize
         score = 0
         letter_counts = {c: self.choice.count(c) for c in set(self.choice)}
@@ -65,7 +154,16 @@ class WordleGame:
 
     def is_valid_word(self, word):
         """
-        Check if a word is valid by querying the dictionary API.
+        Checks if a word is valid by querying a dictionary API or using a cache.
+
+        First checks the cache for the word. If not found, it queries the dictionary API.
+        Handles situations where the API is unavailable.
+
+        Args:
+            word (str): The word to validate.
+
+        Returns:
+            bool: True if the word is valid, False otherwise.
         """
         # First, check the cache
         if word in self.validation_cache:
@@ -94,6 +192,16 @@ class WordleGame:
             return False
 
     def print_word(self, guess, status):
+        """
+        Prints the guessed word with color-coded feedback for each letter.
+
+        Each letter is printed with a background color indicating its correctness:
+        green for exact matches, yellow for close matches, and red for wrong letters.
+
+        Args:
+            guess (str): The guessed word.
+            status (list): A list of status codes for each letter in the guess.
+        """
         for i in range(self.wordsize):
             if status[i] == self.EXACT:
                 print(f"\033[1;37;42m{guess[i]}\033[0m", end="")
@@ -104,6 +212,13 @@ class WordleGame:
         print()
 
     def start(self):
+        """
+        Starts the main game loop.
+
+        This method handles the gameplay, including receiving guesses, validating them,
+        and providing feedback. It also tracks the number of guesses and determines
+        the game's end condition.
+        """
         print(f"\033[1;37;42mThis is WORDLE\033[0m")
         print(
             f"You have {self.guesses} tries to guess the {self.wordsize}-letter word I'm thinking of"
