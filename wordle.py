@@ -30,11 +30,11 @@ class WordleGame:
     CLOSE = 1
     WRONG = 0
 
-    def __init__(self, wordsize):
+    def __init__(self, wordsize, cache):
         if wordsize < 5 or wordsize > 8:
             raise ValueError("Error: wordsize must be either 5, 6, 7, or 8")
         self.wordsize = wordsize
-        self.validation_cache = {}
+        self.validation_cache = cache
         self.wordList = WordList(wordsize, self.validation_cache)
         self.choice = self.wordList.get_random_word()
         self.guesses = wordsize + 1
@@ -141,7 +141,8 @@ def main():
     wordsize = input("Enter desired word size (5-8) to start: ")
     try:
         wordsize = int(wordsize)
-        game = WordleGame(wordsize)
+        validation_cache = {}  # Initialize the cache
+        game = WordleGame(wordsize, validation_cache)
         game.start()
     except Exception as e:
         print(f"Error: {e}")

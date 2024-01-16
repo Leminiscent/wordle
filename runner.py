@@ -20,7 +20,7 @@ TITLE_FONT = pygame.font.Font(OPEN_SANS, 48)
 
 
 class WordlePygame:
-    def __init__(self):
+    def __init__(self, cache):
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Wordle")
         self.clock = pygame.time.Clock()
@@ -28,6 +28,7 @@ class WordlePygame:
         self.current_screen = "main_menu"
         self.input_box = None
         self.guess_log = []
+        self.validation_cache = cache
 
     def main_menu(self):
         self.screen.fill(BACKGROUND_COLOR)
@@ -101,7 +102,7 @@ class WordlePygame:
                     # Create a Rect object from the tuple to use collidepoint
                     button_rect = pygame.Rect(*button_key)
                     if button_rect.collidepoint(mouse_pos):
-                        self.wordle_game = WordleGame(size)
+                        self.wordle_game = WordleGame(size, self.validation_cache)
                         self.guess_log = []
                         self.current_screen = "game_screen"
                         return
@@ -327,7 +328,8 @@ class WordlePygame:
 
 
 def main():
-    game = WordlePygame()
+    validation_cache = {}  # Initialize the cache
+    game = WordlePygame(validation_cache)
     game.run()
 
 
