@@ -107,7 +107,7 @@ class WordlePygame:
                         return
                 if quit_button.collidepoint(mouse_pos):
                     self.screen.fill(BACKGROUND_COLOR)
-                    self.display_message("Goodbye!", 2000)  # Display goodbye message
+                    self.display_message("Goodbye!", 1000, quit_after=True)
 
         pygame.display.update()
 
@@ -152,8 +152,11 @@ class WordlePygame:
                                     else:
                                         # If the API is not available
                                         self.display_message(
-                                            "Guess accepted. API currently unavailable.",
-                                            500,
+                                            [
+                                                "API currently unavailable,",
+                                                "continuing without word validation.",
+                                            ],
+                                            1500,
                                         )
 
                                     text = ""
@@ -177,12 +180,15 @@ class WordlePygame:
                                     == self.wordle_game.EXACT
                                     * self.wordle_game.wordsize
                                 ):
-                                    self.display_message("You won!")
+                                    self.display_message("You won!", 2000)
+                                    self.current_screen = "main_menu"
                                     return
                                 elif self.wordle_game.guesses == 0:
                                     self.display_message(
-                                        f"The word was {self.wordle_game.choice}. You lost!"
+                                        f"The word was {self.wordle_game.choice}. You lost!",
+                                        2000,
                                     )
+                                    self.current_screen = "main_menu"
                                     return
 
                         elif event.key == pygame.K_BACKSPACE:
@@ -209,10 +215,6 @@ class WordlePygame:
 
             pygame.display.flip()
             self.clock.tick(30)
-
-    def dynamic_font_size(self, letter_box_size):
-        """Calculate font size dynamically based on the letter box size."""
-        return int(letter_box_size * 0.95)
 
     def display_guess_log(self):
         # Dynamic adjustment based on word size
@@ -256,9 +258,7 @@ class WordlePygame:
                 pygame.draw.rect(self.screen, color, letter_rect)
 
                 # Draw letter
-                dynamic_font = pygame.font.Font(
-                    OPEN_SANS, self.dynamic_font_size(letter_box_size)
-                )
+                dynamic_font = pygame.font.Font(OPEN_SANS, int(letter_box_size * 0.95))
                 letter_surface = dynamic_font.render(letter.upper(), True, TEXT_COLOR)
                 letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
                 letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
@@ -270,34 +270,47 @@ class WordlePygame:
         text_surface = FONT.render(counter_text, True, TEXT_COLOR)
         self.screen.blit(text_surface, (10, 10))
 
-    def display_message(self, message, wait_time=None):
-        """Display a message at the center of the screen and API status if needed.
+    def display_message(self, message, wait_time=None, quit_after=False):
+        """Display a multi-line message at the center of the screen.
 
         Args:
-        message (str): The message to display.
-        wait_time (int, optional): Time in milliseconds to wait. If None, returns to main menu after displaying the message.
+            message (str or list of str): The message or list of messages to display.
+            wait_time (int, optional): Time in milliseconds to wait.
+            quit_after (bool, optional): If True, quit the game after displaying the message.
         """
-        # Display the main message
-        msg_surface = FONT.render(message, True, TEXT_COLOR)
-        self.screen.blit(
-            msg_surface,
-            (WINDOW_WIDTH / 2 - msg_surface.get_width() / 2, 350),
-        )
+        # If the message is a string, make it a single-element list
+        if isinstance(message, str):
+            message = [message]
 
-        # Display API status if the API is unavailable
-        if not self.wordle_game.api_available:
-            api_status_text = "API unavailable: Continuing without word validation."
-            status_surface = FONT.render(api_status_text, True, TEXT_COLOR)
-            self.screen.blit(status_surface, (10, WINDOW_HEIGHT - 30))
+        # Display each line of the message
+        start_y = 350
+        for line in message:
+            msg_surface = FONT.render(line, True, TEXT_COLOR)
+            self.screen.blit(
+                msg_surface,
+                (WINDOW_WIDTH / 2 - msg_surface.get_width() / 2, start_y),
+            )
+            start_y += FONT.size(line)[1] + 10  # Move to the next line position
 
         pygame.display.update()
-        if wait_time is not None:
-            pygame.time.wait(wait_time)  # Wait for the specified time
-            if wait_time == 2000:  # Specific case for quitting after "Goodbye!"
-                pygame.quit()
-                sys.exit()
-        else:
-            pygame.time.wait(2000)
+
+        if quit_after:
+            pygame.time.wait(wait_time if wait_time is not None else 1000)
+            pygame.quit()
+            sys.exit()
+
+        # Wait for the specified time while processing events
+        start_time = pygame.time.get_ticks()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+            current_time = pygame.time.get_ticks()
+            if wait_time is not None and current_time - start_time >= wait_time:
+                break
+
+        if wait_time is None:
             self.current_screen = "main_menu"
             self.run()
 

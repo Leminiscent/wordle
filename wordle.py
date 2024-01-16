@@ -86,7 +86,7 @@ class WordleGame:
             self.api_available = (
                 False  # Disable API validation for the rest of the session
             )
-            return True
+            return False
 
     def print_word(self, guess, status):
         for i in range(self.wordsize):
