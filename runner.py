@@ -20,7 +20,31 @@ TITLE_FONT = pygame.font.Font(OPEN_SANS, 48)
 
 
 class WordlePygame:
+    """
+    A class for handling the graphical user interface of the Wordle game using pygame.
+
+    This class is responsible for creating and managing the game window, handling
+    user inputs, and rendering the game's graphical elements.
+
+    Attributes:
+        screen (pygame.Surface): The main window surface where the game is displayed.
+        clock (pygame.Clock): A pygame clock to control the game's frame rate.
+        wordle_game (WordleGame): An instance of the WordleGame class.
+        current_screen (str): A string indicating the current screen or game state.
+        input_box (pygame.Rect): A rectangle defining the input box area.
+        guess_log (list): A list to keep track of the guesses and their statuses.
+        validation_cache (dict): A cache for storing and retrieving validated words.
+    """
+
     def __init__(self, cache):
+        """
+        Initializes the WordlePygame with a cache for word validation.
+
+        Sets up the pygame window, fonts, and initializes game-related attributes.
+
+        Args:
+            cache (dict): A cache for storing and retrieving validated words.
+        """
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
         pygame.display.set_caption("Wordle")
         self.clock = pygame.time.Clock()
@@ -31,6 +55,12 @@ class WordlePygame:
         self.validation_cache = cache
 
     def main_menu(self):
+        """
+        Handles the rendering and interaction of the main menu screen.
+
+        Displays the game title, instructions, and buttons for choosing the word size
+        or quitting the game. Handles button click events to start the game or exit.
+        """
         self.screen.fill(BACKGROUND_COLOR)
         mouse_pos = pygame.mouse.get_pos()  # Get current mouse position
         title = TITLE_FONT.render("Wordle", True, TEXT_COLOR)
@@ -114,6 +144,12 @@ class WordlePygame:
         pygame.display.update()
 
     def game_screen(self):
+        """
+        Manages the game screen where the actual Wordle game takes place.
+
+        Handles the rendering of the input box, processing of user input, display of
+        guesses, and game state updates. Manages the game loop and transitions.
+        """
         self.screen.fill(BACKGROUND_COLOR)
         # Input box setup
         input_box = pygame.Rect(WINDOW_WIDTH / 2 - 100, 50, 200, 40)
@@ -227,6 +263,13 @@ class WordlePygame:
             self.clock.tick(30)
 
     def display_guess_log(self):
+        """
+        Renders the log of all guesses made by the player.
+
+        For each guess, displays each letter in a colored box. The color indicates whether
+        the letter is correct (green), in the wrong position (yellow), or not in the word (red).
+        Adjusts the size of the boxes based on the word length.
+        """
         # Dynamic adjustment based on word size
         if self.wordle_game.wordsize <= 5:
             letter_box_size = 40
@@ -275,18 +318,27 @@ class WordlePygame:
                 self.screen.blit(letter_surface, (letter_x, letter_y))
 
     def display_guess_counter(self):
-        """Display the remaining number of guesses."""
+        """
+        Displays the remaining number of guesses on the game screen.
+
+        This method shows the number of guesses left for the player at the top of the screen.
+        It helps the player keep track of how many attempts they have remaining.
+        """
         counter_text = f"Guesses left: {self.wordle_game.guesses}"
         text_surface = FONT.render(counter_text, True, TEXT_COLOR)
         self.screen.blit(text_surface, (10, 10))
 
     def display_message(self, message, wait_time=None, quit_after=False):
-        """Display a multi-line message at the center of the screen.
+        """
+        Displays a message at the center of the screen, optionally waiting for a specified time.
+
+        Can be used to display end-of-game messages, warnings, or other information.
+        The method allows for multi-line messages and can control whether the game quits after displaying the message.
 
         Args:
-            message (str or list of str): The message or list of messages to display.
-            wait_time (int, optional): Time in milliseconds to wait.
-            quit_after (bool, optional): If True, quit the game after displaying the message.
+            message (str or list of str): The message or list of messages to be displayed.
+            wait_time (int, optional): Time in milliseconds to wait before continuing or quitting.
+            quit_after (bool, optional): If True, quits the game after displaying the message.
         """
         # If the message is a string, make it a single-element list
         if isinstance(message, str):
@@ -325,6 +377,12 @@ class WordlePygame:
             self.run()
 
     def run(self):
+        """
+        The main loop of the WordlePygame.
+
+        This method keeps the game running, updating the screen, and handling the transitions
+        between different screens (main menu, game screen) based on the game state.
+        """
         while True:
             if self.current_screen == "main_menu":
                 self.main_menu()
