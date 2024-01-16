@@ -5,17 +5,19 @@ import requests
 class WordList:
     LISTSIZE = 1000
 
-    def __init__(self, wordsize):
+    def __init__(self, wordsize, cache):
         self.wl_filename = f"{wordsize}.txt"
         self.options = []
+        self.cache = cache
         self.load_word_list()
 
     def load_word_list(self):
         try:
             with open(self.wl_filename, "r") as wordlist:
-                self.options = [
-                    wordlist.readline().strip() for _ in range(self.LISTSIZE)
-                ]
+                for _ in range(self.LISTSIZE):
+                    word = wordlist.readline().strip()
+                    self.options.append(word)
+                    self.cache[word] = True  # Add to cache
         except IOError:
             raise RuntimeError(f"Error opening file {self.wl_filename}.")
 
@@ -32,7 +34,8 @@ class WordleGame:
         if wordsize < 5 or wordsize > 8:
             raise ValueError("Error: wordsize must be either 5, 6, 7, or 8")
         self.wordsize = wordsize
-        self.wordList = WordList(wordsize)
+        self.validation_cache = {}
+        self.wordList = WordList(wordsize, self.validation_cache)
         self.choice = self.wordList.get_random_word()
         self.guesses = wordsize + 1
         self.api_available = True
@@ -66,6 +69,10 @@ class WordleGame:
         """
         Check if a word is valid by querying the dictionary API.
         """
+        # First, check the cache
+        if word in self.validation_cache:
+            return self.validation_cache[word]
+
         if not self.api_available:
             # Skip API validation if it's marked as unavailable
             return True
@@ -74,8 +81,10 @@ class WordleGame:
         try:
             response = requests.get(url, timeout=5)
             if response.status_code == 200:
+                self.validation_cache[word] = True
                 return True
             else:
+                self.validation_cache[word] = False
                 return False
         except (requests.Timeout, requests.RequestException) as e:
             # Handle timeout and other request-related exceptions
