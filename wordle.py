@@ -21,9 +21,6 @@ class WordList:
         except IOError:
             raise RuntimeError(f"Error opening file {self.wl_filename}.")
 
-    def get_random_word(self):
-        return random.choice(self.options)
-
 
 class WordleGame:
     EXACT = 2
@@ -37,7 +34,7 @@ class WordleGame:
         self.guessed_words = set()
         self.validation_cache = cache
         self.wordList = WordList(wordsize, self.validation_cache)
-        self.choice = self.wordList.get_random_word()
+        self.choice = random.choice(self.wordList.options)
         self.guesses = wordsize + 1
         self.api_available = True
 
