@@ -306,9 +306,9 @@ class WordlePygame:
         """
         Renders the log of all guesses and hints made by the player.
 
-        For each guess or hint, displays each letter in a colored box. The color indicates whether
+        For each guess, displays each letter in a colored box. The color indicates whether
         the letter is correct (green), in the wrong position (yellow), or not in the word (red).
-        Adjusts the size of the boxes based on the word length.
+        For hints, displays the hinted letter in a similar manner.
         """
         # Dynamic adjustment based on word size
         if self.wordle_game.wordsize <= 5:
@@ -332,30 +332,55 @@ class WordlePygame:
         log_start_x = WINDOW_WIDTH - total_width - 50  # Adjust for right alignment
         log_start_y = 50  # Starting position of the guess log
 
-        for guess_index, (guess, status) in enumerate(self.guess_log):
-            for letter_index, letter in enumerate(guess):
-                # Determine the color based on the status
-                if status[letter_index] == self.wordle_game.EXACT:
-                    color = EXACT_GUESS_COLOR
-                elif status[letter_index] == self.wordle_game.CLOSE:
-                    color = CLOSE_GUESS_COLOR
-                else:
-                    color = WRONG_GUESS_COLOR
+        for guess_index, guess_entry in enumerate(self.guess_log):
+            if guess_entry[0] == "HINT":
+                # Special handling for hint entries
+                if len(guess_entry) == 4:  # EXACT hint
+                    letter, position, status = (
+                        guess_entry[1],
+                        guess_entry[2],
+                        guess_entry[3],
+                    )
+                    # Display the hinted letter at the specific position
+                    self.display_letter_in_box(letter, status, guess_index, position)
+                elif len(guess_entry) == 2:  # CLOSE hint
+                    letter = guess_entry[1]
+                    # Display the hinted letter without a specific position
+                    self.display_letter_in_box(
+                        letter, self.wordle_game.CLOSE, guess_index
+                    )
+            else:
+                # Regular guess handling
+                guess, status_list = guess_entry
+                for letter_index, letter in enumerate(guess):
+                    status = status_list[letter_index]
 
-                # Position of each letter box
-                x = log_start_x + letter_index * (letter_box_size + spacing)
-                y = log_start_y + guess_index * (letter_box_size + spacing)
+                    # Determine color based on status
+                    if status == self.wordle_game.EXACT:
+                        color = EXACT_GUESS_COLOR
+                    elif status == self.wordle_game.CLOSE:
+                        color = CLOSE_GUESS_COLOR
+                    else:
+                        color = WRONG_GUESS_COLOR
 
-                # Draw letter box
-                letter_rect = pygame.Rect(x, y, letter_box_size, letter_box_size)
-                pygame.draw.rect(self.screen, color, letter_rect)
+                    # Position of each letter box
+                    x = log_start_x + letter_index * (letter_box_size + spacing)
+                    y = log_start_y + guess_index * (letter_box_size + spacing)
 
-                # Draw letter
-                dynamic_font = pygame.font.Font(OPEN_SANS, int(letter_box_size * 0.95))
-                letter_surface = dynamic_font.render(letter.upper(), True, TEXT_COLOR)
-                letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
-                letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
-                self.screen.blit(letter_surface, (letter_x, letter_y))
+                    # Draw letter box
+                    letter_rect = pygame.Rect(x, y, letter_box_size, letter_box_size)
+                    pygame.draw.rect(self.screen, color, letter_rect)
+
+                    # Draw letter
+                    dynamic_font = pygame.font.Font(
+                        OPEN_SANS, int(letter_box_size * 0.95)
+                    )
+                    letter_surface = dynamic_font.render(
+                        letter.upper(), True, TEXT_COLOR
+                    )
+                    letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
+                    letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
+                    self.screen.blit(letter_surface, (letter_x, letter_y))
 
     def display_letter_in_box(self, letter, status, guess_index, position=None):
         """
