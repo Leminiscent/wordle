@@ -107,6 +107,44 @@ class WordleGame:
         self.guesses = wordsize + 1
         self.api_available = True
 
+    def get_hint(self, hint_type):
+        """
+        Provides a hint to the player based on the hint type.
+
+        Args:
+            hint_type (str): The type of hint ('CLOSE' or 'EXACT').
+
+        Returns:
+            str: The hinted letter and its position, or a message if no hint is available.
+        """
+        # Check if enough guesses are available
+        if hint_type == "CLOSE" and self.guesses < 1:
+            return "Not enough guesses left for a CLOSE hint."
+        if hint_type == "EXACT" and self.guesses < 2:
+            return "Not enough guesses left for an EXACT hint."
+
+        # Deduct guesses based on hint type
+        self.guesses -= 1 if hint_type == "CLOSE" else 2
+
+        # Find letters that can be hinted
+        potential_hints = []
+        for i, char in enumerate(self.choice):
+            if (
+                hint_type == "CLOSE"
+                and char in self.guessed_words
+                and char != self.choice[i]
+            ):
+                potential_hints.append((char, i))
+            elif hint_type == "EXACT" and char not in self.guessed_words:
+                potential_hints.append((char, i))
+
+        if not potential_hints:
+            return "No hints available for the selected type."
+
+        # Randomly select a hint
+        hinted_letter, position = random.choice(potential_hints)
+        return f"Hint: Letter {hinted_letter.upper()} is {'in the word' if hint_type == 'CLOSE' else 'at position ' + str(position + 1)}."
+
     def get_guess(self):
         """
         Prompts the user to input a guess of the correct word size.
@@ -225,8 +263,15 @@ class WordleGame:
         )
 
         for _ in range(self.guesses):
-            guess = self.get_guess()
+            # Offer hint option
+            hint_choice = input(
+                "Would you like a hint? ('CLOSE' for close hint, 'EXACT' for exact hint, or 'no' to continue): "
+            ).lower()
+            if hint_choice in ["close", "exact"]:
+                print(self.get_hint(hint_choice.upper()))
+                continue
 
+            guess = self.get_guess()
             if guess in self.guessed_words:
                 print("You have already guessed this word. Try a different word.")
                 continue
