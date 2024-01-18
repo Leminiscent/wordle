@@ -156,9 +156,6 @@ class WordlePygame:
         text = ""
         active = True  # Active state of input box
 
-        close_hint_button = pygame.Rect(50, 500, 150, 40)
-        exact_hint_button = pygame.Rect(210, 500, 150, 40)
-
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -170,16 +167,6 @@ class WordlePygame:
                         active = True
                     else:
                         active = False
-
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        # Check if hint buttons are clicked
-                        if close_hint_button.collidepoint(event.pos):
-                            hint_result = self.wordle_game.get_hint("CLOSE")
-                            self.process_hint(hint_result, "CLOSE")
-                        elif exact_hint_button.collidepoint(event.pos):
-                            hint_result = self.wordle_game.get_hint("EXACT")
-                            self.process_hint(hint_result, "EXACT")
-
                 elif event.type == pygame.KEYDOWN:
                     if active:
                         if event.key == pygame.K_RETURN:
@@ -268,14 +255,6 @@ class WordlePygame:
             )  # Change color when active
             pygame.draw.rect(self.screen, box_color, input_box, 2)
 
-            # Draw hint buttons
-            pygame.draw.rect(self.screen, BUTTON_COLOR, close_hint_button)
-            pygame.draw.rect(self.screen, BUTTON_COLOR, exact_hint_button)
-            close_hint_text = FONT.render("Close Hint", True, TEXT_COLOR)
-            exact_hint_text = FONT.render("Exact Hint", True, TEXT_COLOR)
-            self.screen.blit(close_hint_text, (55, 505))
-            self.screen.blit(exact_hint_text, (215, 505))
-
             # Display guess log and guess counter
             self.display_guess_log()
             self.display_guess_counter()
@@ -283,38 +262,13 @@ class WordlePygame:
             pygame.display.flip()
             self.clock.tick(30)
 
-    def process_hint(self, hint_result, hint_type):
-        """
-        Processes the hint result and updates the guess log.
-
-        Args:
-            hint_result (str): The result of the hint operation.
-            hint_type (str): The type of hint ('CLOSE' or 'EXACT').
-        """
-        if "Hint:" in hint_result:
-            # Extract the hinted letter from the hint string
-            letter = hint_result.split()[2]
-
-            if hint_type == "EXACT":
-                # For EXACT hints, extract the position
-                position_str = hint_result.split()[-1]
-                # Remove any non-numeric characters (like '.') from the position string
-                position_str = "".join(filter(str.isdigit, position_str))
-                position = int(position_str) - 1
-                self.guess_log.append(
-                    ("HINT", letter.upper(), position, self.wordle_game.EXACT)
-                )
-            elif hint_type == "CLOSE":
-                # For CLOSE hints, we don't have a specific position
-                self.guess_log.append(("HINT", letter.upper()))
-
     def display_guess_log(self):
         """
-        Renders the log of all guesses and hints made by the player.
+        Renders the log of all guesses made by the player.
 
         For each guess, displays each letter in a colored box. The color indicates whether
         the letter is correct (green), in the wrong position (yellow), or not in the word (red).
-        For hints, displays the hinted letter in a similar manner.
+        Adjusts the size of the boxes based on the word length.
         """
         # Dynamic adjustment based on word size
         if self.wordle_game.wordsize <= 5:
@@ -338,86 +292,30 @@ class WordlePygame:
         log_start_x = WINDOW_WIDTH - total_width - 50  # Adjust for right alignment
         log_start_y = 50  # Starting position of the guess log
 
-        for guess_index, guess_entry in enumerate(self.guess_log):
-            if guess_entry[0] == "HINT":
-                # Special handling for hint entries
-                if len(guess_entry) == 4:  # EXACT hint
-                    letter, position, status = (
-                        guess_entry[1],
-                        guess_entry[2],
-                        guess_entry[3],
-                    )
-                    # Display the hinted letter at the specific position
-                    self.display_letter_in_box(letter, status, guess_index, position)
-                elif len(guess_entry) == 2:  # CLOSE hint
-                    letter = guess_entry[1]
-                    # Display the hinted letter without a specific position
-                    self.display_letter_in_box(
-                        letter, self.wordle_game.CLOSE, guess_index
-                    )
-            else:
-                # Regular guess handling
-                guess, status_list = guess_entry
-                for letter_index, letter in enumerate(guess):
-                    status = status_list[letter_index]
+        for guess_index, (guess, status) in enumerate(self.guess_log):
+            for letter_index, letter in enumerate(guess):
+                # Determine the color based on the status
+                if status[letter_index] == self.wordle_game.EXACT:
+                    color = EXACT_GUESS_COLOR
+                elif status[letter_index] == self.wordle_game.CLOSE:
+                    color = CLOSE_GUESS_COLOR
+                else:
+                    color = WRONG_GUESS_COLOR
 
-                    # Determine color based on status
-                    if status == self.wordle_game.EXACT:
-                        color = EXACT_GUESS_COLOR
-                    elif status == self.wordle_game.CLOSE:
-                        color = CLOSE_GUESS_COLOR
-                    else:
-                        color = WRONG_GUESS_COLOR
+                # Position of each letter box
+                x = log_start_x + letter_index * (letter_box_size + spacing)
+                y = log_start_y + guess_index * (letter_box_size + spacing)
 
-                    # Position of each letter box
-                    x = log_start_x + letter_index * (letter_box_size + spacing)
-                    y = log_start_y + guess_index * (letter_box_size + spacing)
+                # Draw letter box
+                letter_rect = pygame.Rect(x, y, letter_box_size, letter_box_size)
+                pygame.draw.rect(self.screen, color, letter_rect)
 
-                    # Draw letter box
-                    letter_rect = pygame.Rect(x, y, letter_box_size, letter_box_size)
-                    pygame.draw.rect(self.screen, color, letter_rect)
-
-                    # Draw letter
-                    dynamic_font = pygame.font.Font(
-                        OPEN_SANS, int(letter_box_size * 0.95)
-                    )
-                    letter_surface = dynamic_font.render(
-                        letter.upper(), True, TEXT_COLOR
-                    )
-                    letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
-                    letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
-                    self.screen.blit(letter_surface, (letter_x, letter_y))
-
-    def display_letter_in_box(self, letter, status, guess_index, position=None):
-        """
-        Displays a single letter in a box with appropriate color-coding.
-
-        Args:
-            letter (str): The letter to be displayed.
-            status (int): The status of the letter (EXACT, CLOSE, WRONG).
-            guess_index (int): The index of the guess in the guess log.
-            position (int, optional): The position of the letter in the word.
-        """
-        # Calculate the position and size of the box for the letter
-        letter_box_size = 40  # Assuming a fixed size for simplicity
-        x = 50 + (position * letter_box_size if position is not None else 0)
-        y = 100 + guess_index * letter_box_size
-
-        # Color based on the status
-        color = (
-            EXACT_GUESS_COLOR if status == self.wordle_game.EXACT else CLOSE_GUESS_COLOR
-        )
-
-        # Draw the box
-        letter_rect = pygame.Rect(x, y, letter_box_size, letter_box_size)
-        pygame.draw.rect(self.screen, color, letter_rect)
-
-        # Draw the letter in the box
-        dynamic_font = pygame.font.Font(OPEN_SANS, int(letter_box_size * 0.8))
-        letter_surface = dynamic_font.render(letter.upper(), True, TEXT_COLOR)
-        letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
-        letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
-        self.screen.blit(letter_surface, (letter_x, letter_y))
+                # Draw letter
+                dynamic_font = pygame.font.Font(OPEN_SANS, int(letter_box_size * 0.95))
+                letter_surface = dynamic_font.render(letter.upper(), True, TEXT_COLOR)
+                letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
+                letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
+                self.screen.blit(letter_surface, (letter_x, letter_y))
 
     def display_guess_counter(self):
         """
