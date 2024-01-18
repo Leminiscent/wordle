@@ -156,6 +156,9 @@ class WordlePygame:
         text = ""
         active = True  # Active state of input box
 
+        close_hint_button = pygame.Rect(50, 500, 150, 40)
+        exact_hint_button = pygame.Rect(210, 500, 150, 40)
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -167,6 +170,16 @@ class WordlePygame:
                         active = True
                     else:
                         active = False
+
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        # Check if hint buttons are clicked
+                        if close_hint_button.collidepoint(event.pos):
+                            hint_result = self.wordle_game.get_hint("CLOSE")
+                            self.process_hint(hint_result, "CLOSE")
+                        elif exact_hint_button.collidepoint(event.pos):
+                            hint_result = self.wordle_game.get_hint("EXACT")
+                            self.process_hint(hint_result, "EXACT")
+
                 elif event.type == pygame.KEYDOWN:
                     if active:
                         if event.key == pygame.K_RETURN:
@@ -254,6 +267,14 @@ class WordlePygame:
                 BUTTON_HOVER_COLOR if active else INPUT_OUTLINE_COLOR
             )  # Change color when active
             pygame.draw.rect(self.screen, box_color, input_box, 2)
+
+            # Draw hint buttons
+            pygame.draw.rect(self.screen, BUTTON_COLOR, close_hint_button)
+            pygame.draw.rect(self.screen, BUTTON_COLOR, exact_hint_button)
+            close_hint_text = FONT.render("Close Hint", True, TEXT_COLOR)
+            exact_hint_text = FONT.render("Exact Hint", True, TEXT_COLOR)
+            self.screen.blit(close_hint_text, (55, 505))
+            self.screen.blit(exact_hint_text, (215, 505))
 
             # Display guess log and guess counter
             self.display_guess_log()
