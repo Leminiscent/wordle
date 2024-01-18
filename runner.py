@@ -292,14 +292,20 @@ class WordlePygame:
             hint_type (str): The type of hint ('CLOSE' or 'EXACT').
         """
         if "Hint:" in hint_result:
-            hint_info = hint_result.split()[-1]
+            # Extract the hinted letter from the hint string
+            letter = hint_result.split()[2]
+
             if hint_type == "EXACT":
-                letter, position = hint_info.split("@")
+                # For EXACT hints, extract the position
+                position_str = hint_result.split()[-1]
+                # Remove any non-numeric characters (like '.') from the position string
+                position_str = "".join(filter(str.isdigit, position_str))
+                position = int(position_str) - 1
                 self.guess_log.append(
-                    ("HINT", letter.upper(), int(position) - 1, self.wordle_game.EXACT)
+                    ("HINT", letter.upper(), position, self.wordle_game.EXACT)
                 )
             elif hint_type == "CLOSE":
-                letter = hint_info
+                # For CLOSE hints, we don't have a specific position
                 self.guess_log.append(("HINT", letter.upper()))
 
     def display_guess_log(self):
