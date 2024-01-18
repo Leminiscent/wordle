@@ -357,6 +357,37 @@ class WordlePygame:
                 letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
                 self.screen.blit(letter_surface, (letter_x, letter_y))
 
+    def display_letter_in_box(self, letter, status, guess_index, position=None):
+        """
+        Displays a single letter in a box with appropriate color-coding.
+
+        Args:
+            letter (str): The letter to be displayed.
+            status (int): The status of the letter (EXACT, CLOSE, WRONG).
+            guess_index (int): The index of the guess in the guess log.
+            position (int, optional): The position of the letter in the word.
+        """
+        # Calculate the position and size of the box for the letter
+        letter_box_size = 40  # Assuming a fixed size for simplicity
+        x = 50 + (position * letter_box_size if position is not None else 0)
+        y = 100 + guess_index * letter_box_size
+
+        # Color based on the status
+        color = (
+            EXACT_GUESS_COLOR if status == self.wordle_game.EXACT else CLOSE_GUESS_COLOR
+        )
+
+        # Draw the box
+        letter_rect = pygame.Rect(x, y, letter_box_size, letter_box_size)
+        pygame.draw.rect(self.screen, color, letter_rect)
+
+        # Draw the letter in the box
+        dynamic_font = pygame.font.Font(OPEN_SANS, int(letter_box_size * 0.8))
+        letter_surface = dynamic_font.render(letter.upper(), True, TEXT_COLOR)
+        letter_x = x + (letter_box_size - letter_surface.get_width()) / 2
+        letter_y = y + (letter_box_size - letter_surface.get_height()) / 2
+        self.screen.blit(letter_surface, (letter_x, letter_y))
+
     def display_guess_counter(self):
         """
         Displays the remaining number of guesses on the game screen.
