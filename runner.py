@@ -283,6 +283,25 @@ class WordlePygame:
             pygame.display.flip()
             self.clock.tick(30)
 
+    def process_hint(self, hint_result, hint_type):
+        """
+        Processes the hint result and updates the guess log.
+
+        Args:
+            hint_result (str): The result of the hint operation.
+            hint_type (str): The type of hint ('CLOSE' or 'EXACT').
+        """
+        if "Hint:" in hint_result:
+            hint_info = hint_result.split()[-1]
+            if hint_type == "EXACT":
+                letter, position = hint_info.split("@")
+                self.guess_log.append(
+                    ("HINT", letter.upper(), int(position) - 1, self.wordle_game.EXACT)
+                )
+            elif hint_type == "CLOSE":
+                letter = hint_info
+                self.guess_log.append(("HINT", letter.upper()))
+
     def display_guess_log(self):
         """
         Renders the log of all guesses made by the player.
