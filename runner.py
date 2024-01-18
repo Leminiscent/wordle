@@ -11,9 +11,9 @@ TEXT_COLOR = (48, 71, 94)  # Dark Blue
 BUTTON_COLOR = (100, 181, 246)  # Light Blue
 BUTTON_HOVER_COLOR = (41, 182, 246)  # Brighter Blue
 INPUT_OUTLINE_COLOR = (224, 224, 224)  # Light Grey
-CORRECT_GUESS_COLOR = (129, 199, 132)  # Soft Green
+EXACT_GUESS_COLOR = (129, 199, 132)  # Soft Green
 CLOSE_GUESS_COLOR = (255, 235, 59)  # Muted Yellow
-INCORRECT_GUESS_COLOR = (239, 83, 80)  # Soft Red
+WRONG_GUESS_COLOR = (239, 83, 80)  # Soft Red
 OPEN_SANS = "assets/fonts/OpenSans-Regular.ttf"
 FONT = pygame.font.Font(OPEN_SANS, 36)
 TITLE_FONT = pygame.font.Font(OPEN_SANS, 48)
@@ -296,11 +296,11 @@ class WordlePygame:
             for letter_index, letter in enumerate(guess):
                 # Determine the color based on the status
                 if status[letter_index] == self.wordle_game.EXACT:
-                    color = CORRECT_GUESS_COLOR
+                    color = EXACT_GUESS_COLOR
                 elif status[letter_index] == self.wordle_game.CLOSE:
                     color = CLOSE_GUESS_COLOR
                 else:
-                    color = INCORRECT_GUESS_COLOR
+                    color = WRONG_GUESS_COLOR
 
                 # Position of each letter box
                 x = log_start_x + letter_index * (letter_box_size + spacing)
