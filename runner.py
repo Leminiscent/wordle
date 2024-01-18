@@ -304,9 +304,9 @@ class WordlePygame:
 
     def display_guess_log(self):
         """
-        Renders the log of all guesses made by the player.
+        Renders the log of all guesses and hints made by the player.
 
-        For each guess, displays each letter in a colored box. The color indicates whether
+        For each guess or hint, displays each letter in a colored box. The color indicates whether
         the letter is correct (green), in the wrong position (yellow), or not in the word (red).
         Adjusts the size of the boxes based on the word length.
         """
