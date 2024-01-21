@@ -171,7 +171,7 @@ class WordlePygame:
                     if active:
                         if event.key == pygame.K_RETURN:
                             # Process guess
-                            guess = text.lower()
+                            guess = text.upper()
                             if len(guess) == self.wordle_game.wordsize:
                                 if not guess.isalpha():
                                     self.display_message(

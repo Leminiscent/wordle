@@ -118,7 +118,7 @@ class WordleGame:
         """
         guess = ""
         while len(guess) != self.wordsize:
-            guess = input(f"Input a {self.wordsize}-letter word: ").strip().lower()
+            guess = input(f"Input a {self.wordsize}-letter word: ").strip().upper()
         return guess
 
     def check_word(self, guess):
@@ -228,7 +228,7 @@ class WordleGame:
             guess = self.get_guess()
 
             if guess in self.guessed_words:
-                print("You have already guessed this word. Try a different word.")
+                print(f"You have already guessed {guess}. Try a different word.")
                 continue
             self.guessed_words.add(guess)  # Add guess to the set of guessed words
 
