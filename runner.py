@@ -182,7 +182,7 @@ class WordlePygame:
 
                                 if guess in self.wordle_game.guessed_words:
                                     self.display_message(
-                                        "You have already guessed this word.", 750
+                                        f"You have already guessed {guess}.", 750
                                     )
                                     text = ""
                                     continue
