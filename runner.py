@@ -156,6 +156,23 @@ class WordlePygame:
         text = ""
         active = True  # Active state of input box
 
+        # Define button dimensions and positions
+        button_width, button_height = 150, 50
+        buttons_start_x, buttons_start_y = 50, 100
+
+        # Reset Button
+        reset_button = pygame.Rect(
+            buttons_start_x, buttons_start_y, button_width, button_height
+        )
+
+        # Main Menu Button
+        main_menu_button = pygame.Rect(
+            buttons_start_x,
+            buttons_start_y + button_height + 10,
+            button_width,
+            button_height,
+        )
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -167,6 +184,21 @@ class WordlePygame:
                         active = True
                     else:
                         active = False
+
+                    if reset_button.collidepoint(mouse_pos):
+                        # Reset game logic
+                        self.wordle_game = WordleGame(
+                            self.wordle_game.wordsize, self.validation_cache
+                        )
+                        self.wordle_game.guessed_words = set()
+                        self.guess_log = []
+                        self.current_screen = "game_screen"
+                        return
+                    elif main_menu_button.collidepoint(mouse_pos):
+                        # Return to main menu
+                        self.current_screen = "main_menu"
+                        return
+
                 elif event.type == pygame.KEYDOWN:
                     if active:
                         if event.key == pygame.K_RETURN:
@@ -243,8 +275,39 @@ class WordlePygame:
                             if len(text) < self.wordle_game.wordsize:
                                 text += event.unicode
 
-            # Input box
             self.screen.fill(BACKGROUND_COLOR)
+
+            # Check for mouseover and draw buttons
+            mouse_pos = pygame.mouse.get_pos()
+            for button in [reset_button, main_menu_button]:
+                if button.collidepoint(mouse_pos):
+                    pygame.draw.rect(self.screen, BUTTON_HOVER_COLOR, button)
+                else:
+                    pygame.draw.rect(self.screen, BUTTON_COLOR, button)
+                pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, button, 2)
+
+            # Draw button text
+            reset_text = FONT.render("Reset", True, TEXT_COLOR)
+            self.screen.blit(
+                reset_text,
+                (
+                    buttons_start_x + (button_width - reset_text.get_width()) / 2,
+                    buttons_start_y + (button_height - reset_text.get_height()) / 2,
+                ),
+            )
+            menu_text = FONT.render("Menu", True, TEXT_COLOR)
+            self.screen.blit(
+                menu_text,
+                (
+                    buttons_start_x + (button_width - menu_text.get_width()) / 2,
+                    buttons_start_y
+                    + button_height
+                    + 10
+                    + (button_height - menu_text.get_height()) / 2,
+                ),
+            )
+
+            # Input box
             txt_surface = FONT.render(text, True, TEXT_COLOR)
             # Align text in the center of the input box
             text_x = input_box.x + (input_box.width - txt_surface.get_width()) / 2
