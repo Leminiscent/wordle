@@ -171,7 +171,7 @@ class WordlePygame:
                     if active:
                         if event.key == pygame.K_RETURN:
                             # Process guess
-                            guess = text.upper()
+                            guess = text.lower()
                             if len(guess) == self.wordle_game.wordsize:
                                 if not guess.isalpha():
                                     self.display_message(
@@ -182,7 +182,7 @@ class WordlePygame:
 
                                 if guess in self.wordle_game.guessed_words:
                                     self.display_message(
-                                        f"You have already guessed {guess}.", 750
+                                        f"You have already guessed '{guess}'.", 750
                                     )
                                     text = ""
                                     continue
