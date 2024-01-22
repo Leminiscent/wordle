@@ -2,21 +2,22 @@ import pygame
 import sys
 from wordle import WordleGame
 
+# Initialize pygame
 pygame.init()
 
-# Constants
+# Constants for colors, fonts, and window dimensions
 WINDOW_WIDTH, WINDOW_HEIGHT = 800, 600
-BACKGROUND_COLOR = (242, 242, 242)  # Light Grey
-TEXT_COLOR = (48, 71, 94)  # Dark Blue
-BUTTON_COLOR = (100, 181, 246)  # Light Blue
-BUTTON_HOVER_COLOR = (41, 182, 246)  # Brighter Blue
-INPUT_OUTLINE_COLOR = (224, 224, 224)  # Light Grey
-EXACT_GUESS_COLOR = (129, 199, 132)  # Soft Green
-CLOSE_GUESS_COLOR = (255, 235, 59)  # Muted Yellow
-WRONG_GUESS_COLOR = (239, 83, 80)  # Soft Red
-OPEN_SANS = "assets/fonts/OpenSans-Regular.ttf"
-FONT = pygame.font.Font(OPEN_SANS, 36)
-TITLE_FONT = pygame.font.Font(OPEN_SANS, 48)
+BACKGROUND_COLOR = (242, 242, 242)  # Light Grey background
+TEXT_COLOR = (48, 71, 94)  # Dark Blue text
+BUTTON_COLOR = (100, 181, 246)  # Light Blue buttons
+BUTTON_HOVER_COLOR = (41, 182, 246)  # Brighter Blue for button hover effect
+INPUT_OUTLINE_COLOR = (224, 224, 224)  # Light Grey for input box outline
+EXACT_GUESS_COLOR = (129, 199, 132)  # Soft Green for exact letter matches
+CLOSE_GUESS_COLOR = (255, 235, 59)  # Muted Yellow for close letter matches
+WRONG_GUESS_COLOR = (239, 83, 80)  # Soft Red for incorrect letters
+OPEN_SANS = "assets/fonts/OpenSans-Regular.ttf"  # Path to OpenSans font
+FONT = pygame.font.Font(OPEN_SANS, 36)  # Default font for text
+TITLE_FONT = pygame.font.Font(OPEN_SANS, 48)  # Larger font for the game title
 
 
 class WordlePygame:
@@ -64,7 +65,7 @@ class WordlePygame:
         self.screen.fill(BACKGROUND_COLOR)
         self.render_title()
         self.render_instructions()
-        word_sizes = [5, 6, 7, 8]
+        word_sizes = [5, 6, 7, 8]  # Available word sizes
         buttons = self.render_word_size_buttons(word_sizes)
         quit_button = self.render_quit_button()
 
@@ -112,16 +113,18 @@ class WordlePygame:
             button_y = grid_start_y + (i // 2) * (button_height + 10)
             button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
 
-            # Use a tuple of the rect's properties as the key
+            # Use a tuple of the rect's properties as the key for the button
             button_key = (button_x, button_y, button_width, button_height)
             buttons[button_key] = size
 
+            # Change color on hover
             if button_rect.collidepoint(pygame.mouse.get_pos()):
                 pygame.draw.rect(self.screen, BUTTON_HOVER_COLOR, button_rect)
             else:
                 pygame.draw.rect(self.screen, BUTTON_COLOR, button_rect)
             pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, button_rect, 2)
 
+            # Draw button text
             button_text = FONT.render(str(size), True, TEXT_COLOR)
             self.screen.blit(
                 button_text,
@@ -149,6 +152,7 @@ class WordlePygame:
             button_height,
         )
 
+        # Change color on hover
         if quit_button.collidepoint(pygame.mouse.get_pos()):
             pygame.draw.rect(self.screen, BUTTON_HOVER_COLOR, quit_button)
         else:
@@ -236,7 +240,7 @@ class WordlePygame:
             if self.current_screen != "game_screen":
                 break  # Exit the loop if the screen should change
             self.update_game_display()
-            self.clock.tick(30)
+            self.clock.tick(30)  # Limit to 30 frames per second for consistent timing
 
     def handle_events(self):
         """
