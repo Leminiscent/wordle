@@ -289,8 +289,9 @@ class WordlePygame:
             if event.key == pygame.K_RETURN:
                 self.process_guess()
             elif event.key == pygame.K_BACKSPACE:
-                self.text = self.text[:-1]
+                self.text = self.text[:-1]  # Remove the last character
             else:
+                # Add character to input if it doesn't exceed word length
                 if len(self.text) < self.wordle_game.wordsize:
                     self.text += event.unicode
 
@@ -507,34 +508,38 @@ class WordlePygame:
         if isinstance(message, str):
             message = [message]
 
-        # Display each line of the message
+        # Calculate the starting Y position for the message
         start_y = 350
         for line in message:
             msg_surface = FONT.render(line, True, TEXT_COLOR)
+            # Center the message horizontally on the screen
             self.screen.blit(
                 msg_surface,
                 (WINDOW_WIDTH / 2 - msg_surface.get_width() / 2, start_y),
             )
-            start_y += FONT.size(line)[1] + 10  # Move to the next line position
+            # Move to the next line position
+            start_y += FONT.size(line)[1] + 10
 
         pygame.display.update()
 
+        # Wait for the specified time while processing events, if wait_time is provided
+        if wait_time:
+            start_time = pygame.time.get_ticks()
+            while True:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        sys.exit()
+                current_time = pygame.time.get_ticks()
+                if current_time - start_time >= wait_time:
+                    break
+
+        # If quit_after is True, exit the game after displaying the message
         if quit_after:
-            pygame.time.wait(wait_time if wait_time is not None else 1000)
             pygame.quit()
             sys.exit()
 
-        # Wait for the specified time while processing events
-        start_time = pygame.time.get_ticks()
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-            current_time = pygame.time.get_ticks()
-            if wait_time is not None and current_time - start_time >= wait_time:
-                break
-
+        # If no wait_time is provided, transition to main menu after displaying the message
         if wait_time is None:
             self.current_screen = "main_menu"
             self.run()
@@ -554,7 +559,7 @@ class WordlePygame:
 
             # Update the display and tick the clock
             pygame.display.flip()
-            self.clock.tick(30)  # 30 frames per second
+            self.clock.tick(30)  # Limit to 30 frames per second
 
 
 def main():
