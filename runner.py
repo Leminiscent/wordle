@@ -162,184 +162,204 @@ class WordlePygame:
     def game_screen(self):
         """
         Manages the game screen where the actual Wordle game takes place.
+        """
+        self.initialize_ui_elements()
+        self.game_loop()
 
-        Handles the rendering of the input box, processing of user input, display of
-        guesses, and game state updates. Manages the game loop and transitions.
+    def initialize_ui_elements(self):
+        """
+        Initializes UI elements like input boxes and buttons.
         """
         self.screen.fill(BACKGROUND_COLOR)
         # Input box setup
-        input_box = pygame.Rect(WINDOW_WIDTH / 2 - 100, 50, 200, 40)
-        text = ""
-        active = True  # Active state of input box
+        self.input_box = pygame.Rect(WINDOW_WIDTH / 2 - 100, 50, 200, 40)
+        self.text = ""
+        self.active = True  # Active state of input box
 
         # Define button dimensions and positions
         button_width, button_height = 150, 50
         buttons_start_x, buttons_start_y = 50, 100
 
         # Reset Button
-        reset_button = pygame.Rect(
+        self.reset_button = pygame.Rect(
             buttons_start_x, buttons_start_y, button_width, button_height
         )
 
         # Main Menu Button
-        main_menu_button = pygame.Rect(
+        self.main_menu_button = pygame.Rect(
             buttons_start_x,
             buttons_start_y + button_height + 10,
             button_width,
             button_height,
         )
 
+    def game_loop(self):
+        """
+        The main game loop, handling events and updating the game screen.
+        """
         while True:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    # If the user clicked on the input_box rect.
-                    if input_box.collidepoint(event.pos):
-                        active = True
-                    else:
-                        active = False
+            self.handle_events()
+            if self.current_screen != "game_screen":
+                break  # Exit the loop if the screen should change
+            self.update_game_display()
+            self.clock.tick(30)
 
-                    if reset_button.collidepoint(mouse_pos):
-                        # Reset game logic
-                        self.wordle_game = WordleGame(
-                            self.wordle_game.wordsize, self.validation_cache
-                        )
-                        self.wordle_game.guessed_words = set()
-                        self.guess_log = []
-                        self.current_screen = "game_screen"
-                        return
-                    elif main_menu_button.collidepoint(mouse_pos):
-                        # Return to main menu
-                        self.current_screen = "main_menu"
-                        return
+    def handle_events(self):
+        """
+        Handles user input events like mouse clicks and keyboard inputs.
+        """
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.quit_game()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.handle_mouse_click(event)
+            elif event.type == pygame.KEYDOWN:
+                self.handle_key_press(event)
 
-                elif event.type == pygame.KEYDOWN:
-                    if active:
-                        if event.key == pygame.K_RETURN:
-                            # Process guess
-                            guess = text.lower()
-                            if len(guess) == self.wordle_game.wordsize:
-                                if not guess.isalpha():
-                                    self.display_message(
-                                        "Invalid input! Use only letters.", 750
-                                    )
-                                    text = ""
-                                    continue
+    def handle_mouse_click(self, event):
+        mouse_pos = pygame.mouse.get_pos()
+        if self.input_box.collidepoint(event.pos):
+            self.active = True
+        elif self.reset_button.collidepoint(mouse_pos):
+            # Reset game logic
+            self.reset_game()
+            self.active = True  # Activate the input box
+            return
+        elif self.main_menu_button.collidepoint(mouse_pos):
+            self.current_screen = "main_menu"
+            return
+        else:
+            self.active = False
 
-                                if guess in self.wordle_game.guessed_words:
-                                    self.display_message(
-                                        f"You have already guessed '{guess}'.", 750
-                                    )
-                                    text = ""
-                                    continue
-                                self.wordle_game.guessed_words.add(guess)
+    def handle_key_press(self, event):
+        """
+        Handles key press events.
+        """
+        if self.active:
+            if event.key == pygame.K_RETURN:
+                self.process_guess()
+            elif event.key == pygame.K_BACKSPACE:
+                self.text = self.text[:-1]
+            else:
+                if len(self.text) < self.wordle_game.wordsize:
+                    self.text += event.unicode
 
-                                # Check if the guess is a valid word, considering API availability
-                                if not self.wordle_game.is_valid_word(guess):
-                                    if self.wordle_game.api_available:
-                                        # If the API is available but the word is invalid
-                                        self.display_message(
-                                            "Not a valid word. Try again.", 750
-                                        )
-                                    else:
-                                        # If the API is not available
-                                        self.display_message(
-                                            [
-                                                "API currently unavailable,",
-                                                "continuing without word validation.",
-                                            ],
-                                            1500,
-                                        )
+    def process_guess(self):
+        """
+        Processes the player's guess.
+        """
+        guess = self.text.lower()
+        if len(guess) == self.wordle_game.wordsize:
+            if not guess.isalpha():
+                self.display_message("Invalid input! Use only letters.", 750)
+                self.text = ""
+                return
 
-                                    text = ""
-                                    continue
+            if guess in self.wordle_game.guessed_words:
+                self.display_message(f"You have already guessed '{guess}'.", 750)
+                self.text = ""
+                return
+            self.wordle_game.guessed_words.add(guess)
 
-                                # Check the guess and update guess log
-                                score, status = self.wordle_game.check_word(guess)
-                                self.guess_log.append((guess, status))
-                                text = ""  # Reset text
-                                self.wordle_game.guesses -= 1
-
-                                # Update the guess log and guess counter display
-                                self.screen.fill(BACKGROUND_COLOR)
-                                self.display_guess_log()
-                                self.display_guess_counter()
-                                pygame.display.flip()
-
-                                # Check for win or lose conditions
-                                if (
-                                    score
-                                    == self.wordle_game.EXACT
-                                    * self.wordle_game.wordsize
-                                ):
-                                    self.display_message("You won!", 2000)
-                                    self.current_screen = "main_menu"
-                                    return
-                                elif self.wordle_game.guesses == 0:
-                                    self.display_message(
-                                        f"The word was {self.wordle_game.choice}. You lost!",
-                                        2000,
-                                    )
-                                    self.current_screen = "main_menu"
-                                    return
-
-                        elif event.key == pygame.K_BACKSPACE:
-                            text = text[:-1]
-                        else:
-                            if len(text) < self.wordle_game.wordsize:
-                                text += event.unicode
-
-            self.screen.fill(BACKGROUND_COLOR)
-
-            # Check for mouseover and draw buttons
-            mouse_pos = pygame.mouse.get_pos()
-            for button in [reset_button, main_menu_button]:
-                if button.collidepoint(mouse_pos):
-                    pygame.draw.rect(self.screen, BUTTON_HOVER_COLOR, button)
+            if not self.wordle_game.is_valid_word(guess):
+                if self.wordle_game.api_available:
+                    self.display_message("Not a valid word. Try again.", 750)
                 else:
-                    pygame.draw.rect(self.screen, BUTTON_COLOR, button)
-                pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, button, 2)
+                    self.display_message(
+                        [
+                            "API currently unavailable,",
+                            "continuing without word validation.",
+                        ],
+                        1500,
+                    )
+
+                self.text = ""
+                return
+
+            score, status = self.wordle_game.check_word(guess)
+            self.guess_log.append((guess, status))
+            self.text = ""  # Reset text
+            self.wordle_game.guesses -= 1
+
+            if score == self.wordle_game.EXACT * self.wordle_game.wordsize:
+                self.display_message("You won!", 2000)
+                self.current_screen = "main_menu"
+                return
+            elif self.wordle_game.guesses == 0:
+                self.display_message(
+                    f"The word was {self.wordle_game.choice}. You lost!", 2000
+                )
+                self.current_screen = "main_menu"
+                return
+
+    def update_game_display(self):
+        """
+        Updates and redraws the game display.
+        """
+        self.screen.fill(BACKGROUND_COLOR)
+        self.draw_buttons()
+        self.draw_input_box()
+        # Display guess log and guess counter
+        self.display_guess_log()
+        self.display_guess_counter()
+        pygame.display.flip()
+
+    def draw_buttons(self):
+        """
+        Draws buttons on the screen.
+        """
+        mouse_pos = pygame.mouse.get_pos()
+
+        # Loop through each button and draw
+        for button, text in [
+            (self.reset_button, "Reset"),
+            (self.main_menu_button, "Menu"),
+        ]:
+            if button.collidepoint(mouse_pos):
+                # Change color on hover
+                pygame.draw.rect(self.screen, BUTTON_HOVER_COLOR, button)
+            else:
+                pygame.draw.rect(self.screen, BUTTON_COLOR, button)
+
+            # Draw button outline
+            pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, button, 2)
 
             # Draw button text
-            reset_text = FONT.render("Reset", True, TEXT_COLOR)
-            self.screen.blit(
-                reset_text,
-                (
-                    buttons_start_x + (button_width - reset_text.get_width()) / 2,
-                    buttons_start_y + (button_height - reset_text.get_height()) / 2,
-                ),
-            )
-            menu_text = FONT.render("Menu", True, TEXT_COLOR)
-            self.screen.blit(
-                menu_text,
-                (
-                    buttons_start_x + (button_width - menu_text.get_width()) / 2,
-                    buttons_start_y
-                    + button_height
-                    + 10
-                    + (button_height - menu_text.get_height()) / 2,
-                ),
-            )
+            text_surface = FONT.render(text, True, TEXT_COLOR)
+            text_x = button.x + (button.width - text_surface.get_width()) / 2
+            text_y = button.y + (button.height - text_surface.get_height()) / 2
+            self.screen.blit(text_surface, (text_x, text_y))
 
-            # Input box
-            txt_surface = FONT.render(text, True, TEXT_COLOR)
-            # Align text in the center of the input box
-            text_x = input_box.x + (input_box.width - txt_surface.get_width()) / 2
-            text_y = input_box.y + (input_box.height - txt_surface.get_height()) / 2
-            self.screen.blit(txt_surface, (text_x, text_y))
-            box_color = (
-                BUTTON_HOVER_COLOR if active else INPUT_OUTLINE_COLOR
-            )  # Change color when active
-            pygame.draw.rect(self.screen, box_color, input_box, 2)
+    def draw_input_box(self):
+        """
+        Draws the input box on the screen.
+        """
+        txt_surface = FONT.render(self.text, True, TEXT_COLOR)
+        # Align text in the center of the input box
+        text_x = self.input_box.x + (self.input_box.width - txt_surface.get_width()) / 2
+        text_y = (
+            self.input_box.y + (self.input_box.height - txt_surface.get_height()) / 2
+        )
+        self.screen.blit(txt_surface, (text_x, text_y))
+        box_color = BUTTON_HOVER_COLOR if self.active else INPUT_OUTLINE_COLOR
+        pygame.draw.rect(self.screen, box_color, self.input_box, 2)
 
-            # Display guess log and guess counter
-            self.display_guess_log()
-            self.display_guess_counter()
+    def reset_game(self):
+        """
+        Resets the game to its initial state.
+        """
+        # Reset the game logic
+        self.wordle_game = WordleGame(self.wordle_game.wordsize, self.validation_cache)
+        self.wordle_game.guessed_words = set()
+        self.guess_log = []
+        self.current_screen = "game_screen"
 
-            pygame.display.flip()
-            self.clock.tick(30)
+    def quit_game(self):
+        """
+        Quits the game and exits.
+        """
+        pygame.quit()
+        sys.exit()
 
     def display_guess_log(self):
         """
