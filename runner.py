@@ -62,33 +62,51 @@ class WordlePygame:
         or quitting the game. Handles button click events to start the game or exit.
         """
         self.screen.fill(BACKGROUND_COLOR)
-        mouse_pos = pygame.mouse.get_pos()  # Get current mouse position
+        self.render_title()
+        self.render_instructions()
+        word_sizes = [5, 6, 7, 8]
+        buttons = self.render_word_size_buttons(word_sizes)
+        quit_button = self.render_quit_button()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                self.handle_main_menu_click(event.pos, buttons, quit_button)
+
+        pygame.display.update()
+
+    def render_title(self):
         title = TITLE_FONT.render("Wordle", True, TEXT_COLOR)
-        instructions = FONT.render("Choose your word size to start", True, TEXT_COLOR)
         self.screen.blit(title, (WINDOW_WIDTH / 2 - title.get_width() / 2, 30))
+
+    def render_instructions(self):
+        instructions = FONT.render("Choose your word size to start", True, TEXT_COLOR)
         self.screen.blit(
             instructions, (WINDOW_WIDTH / 2 - instructions.get_width() / 2, 100)
         )
 
-        # Button dimensions and positions
+    def render_word_size_buttons(self, word_sizes):
         button_width, button_height = 100, 50
         grid_start_x, grid_start_y = WINDOW_WIDTH / 2 - button_width - 10, 200
-
-        # Drawing buttons for word sizes and quit
-        word_sizes = [5, 6, 7, 8]
         buttons = {}
+
         for i, size in enumerate(word_sizes):
             button_x = grid_start_x + (i % 2) * (button_width + 10)
             button_y = grid_start_y + (i // 2) * (button_height + 10)
             button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
-            buttons[(button_x, button_y, button_width, button_height)] = size
 
-            # Change button color when hovered
-            if button_rect.collidepoint(mouse_pos):
+            # Use a tuple of the rect's properties as the key
+            button_key = (button_x, button_y, button_width, button_height)
+            buttons[button_key] = size
+
+            if button_rect.collidepoint(pygame.mouse.get_pos()):
                 pygame.draw.rect(self.screen, BUTTON_HOVER_COLOR, button_rect)
             else:
                 pygame.draw.rect(self.screen, BUTTON_COLOR, button_rect)
             pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, button_rect, 2)
+
             button_text = FONT.render(str(size), True, TEXT_COLOR)
             self.screen.blit(
                 button_text,
@@ -98,50 +116,48 @@ class WordlePygame:
                 ),
             )
 
-        # Quit button positioned under the 2x2 grid
-        quit_button_x, quit_button_y = grid_start_x, grid_start_y + 2 * (
-            button_height + 10
-        )
+        return buttons
+
+    def render_quit_button(self):
+        button_width, button_height = 100, 50
+        grid_start_x, grid_start_y = WINDOW_WIDTH / 2 - button_width - 10, 200
         quit_button = pygame.Rect(
-            quit_button_x,
-            quit_button_y,
-            2 * button_width + 10,  # Width to span the entire grid width
+            grid_start_x,
+            grid_start_y + 2 * (button_height + 10),
+            2 * button_width + 10,
             button_height,
         )
-        if quit_button.collidepoint(mouse_pos):
+
+        if quit_button.collidepoint(pygame.mouse.get_pos()):
             pygame.draw.rect(self.screen, BUTTON_HOVER_COLOR, quit_button)
         else:
             pygame.draw.rect(self.screen, BUTTON_COLOR, quit_button)
         pygame.draw.rect(self.screen, INPUT_OUTLINE_COLOR, quit_button, 2)
+
         quit_text = FONT.render("Quit", True, TEXT_COLOR)
         self.screen.blit(
             quit_text,
             (
-                quit_button_x + quit_button.width / 2 - quit_text.get_width() / 2,
-                quit_button_y + button_height / 2 - quit_text.get_height() / 2,
+                quit_button.x + quit_button.width / 2 - quit_text.get_width() / 2,
+                quit_button.y + button_height / 2 - quit_text.get_height() / 2,
             ),
         )
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = event.pos
-                for button_key, size in buttons.items():
-                    # Create a Rect object from the tuple to use collidepoint
-                    button_rect = pygame.Rect(*button_key)
-                    if button_rect.collidepoint(mouse_pos):
-                        self.wordle_game = WordleGame(size, self.validation_cache)
-                        self.wordle_game.guessed_words = set()
-                        self.guess_log = []
-                        self.current_screen = "game_screen"
-                        return
-                if quit_button.collidepoint(mouse_pos):
-                    self.screen.fill(BACKGROUND_COLOR)
-                    self.display_message("Goodbye!", 1000, quit_after=True)
+        return quit_button
 
-        pygame.display.update()
+    def handle_main_menu_click(self, mouse_pos, buttons, quit_button):
+        for button_key, size in buttons.items():
+            button_rect = pygame.Rect(button_key)
+            if button_rect.collidepoint(mouse_pos):
+                self.wordle_game = WordleGame(size, self.validation_cache)
+                self.wordle_game.guessed_words = set()
+                self.guess_log = []
+                self.current_screen = "game_screen"
+                return
+
+        if quit_button.collidepoint(mouse_pos):
+            pygame.quit()
+            sys.exit()
 
     def game_screen(self):
         """
