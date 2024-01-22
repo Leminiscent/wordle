@@ -78,16 +78,31 @@ class WordlePygame:
         pygame.display.update()
 
     def render_title(self):
+        """
+        Renders the game title at the top of the screen.
+        """
         title = TITLE_FONT.render("Wordle", True, TEXT_COLOR)
         self.screen.blit(title, (WINDOW_WIDTH / 2 - title.get_width() / 2, 30))
 
     def render_instructions(self):
+        """
+        Renders instructions for the user on how to start the game.
+        """
         instructions = FONT.render("Choose your word size to start", True, TEXT_COLOR)
         self.screen.blit(
             instructions, (WINDOW_WIDTH / 2 - instructions.get_width() / 2, 100)
         )
 
     def render_word_size_buttons(self, word_sizes):
+        """
+        Renders buttons for each available word size.
+
+        Args:
+            word_sizes (list): A list of integers representing the available word sizes.
+
+        Returns:
+            dict: A dictionary mapping button rectangles to their corresponding word sizes.
+        """
         button_width, button_height = 100, 50
         grid_start_x, grid_start_y = WINDOW_WIDTH / 2 - button_width - 10, 200
         buttons = {}
@@ -119,6 +134,12 @@ class WordlePygame:
         return buttons
 
     def render_quit_button(self):
+        """
+        Renders a 'Quit' button on the main menu screen.
+
+        Returns:
+            pygame.Rect: A rectangle representing the position and size of the quit button.
+        """
         button_width, button_height = 100, 50
         grid_start_x, grid_start_y = WINDOW_WIDTH / 2 - button_width - 10, 200
         quit_button = pygame.Rect(
@@ -146,6 +167,14 @@ class WordlePygame:
         return quit_button
 
     def handle_main_menu_click(self, mouse_pos, buttons, quit_button):
+        """
+        Handles click events on the main menu screen.
+
+        Args:
+            mouse_pos (tuple): The position of the mouse click.
+            buttons (dict): A dictionary mapping button rectangles to word sizes.
+            quit_button (pygame.Rect): The rectangle representing the quit button.
+        """
         for button_key, size in buttons.items():
             button_rect = pygame.Rect(button_key)
             if button_rect.collidepoint(mouse_pos):
@@ -162,13 +191,15 @@ class WordlePygame:
     def game_screen(self):
         """
         Manages the game screen where the actual Wordle game takes place.
+
+        Initializes UI elements and enters the main game loop.
         """
         self.initialize_ui_elements()
         self.game_loop()
 
     def initialize_ui_elements(self):
         """
-        Initializes UI elements like input boxes and buttons.
+        Initializes input box and buttons for the game screen.
         """
         self.screen.fill(BACKGROUND_COLOR)
         # Input box setup
@@ -196,6 +227,9 @@ class WordlePygame:
     def game_loop(self):
         """
         The main game loop, handling events and updating the game screen.
+
+        Continuously processes user input events and updates the display.
+        Exits the loop if the game screen changes.
         """
         while True:
             self.handle_events()
@@ -207,6 +241,9 @@ class WordlePygame:
     def handle_events(self):
         """
         Handles user input events like mouse clicks and keyboard inputs.
+
+        Processes events related to quitting the game, clicking the mouse, and pressing keys.
+        Manages the input for the game, including submitting guesses and navigating between screens.
         """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -217,6 +254,12 @@ class WordlePygame:
                 self.handle_key_press(event)
 
     def handle_mouse_click(self, event):
+        """
+        Handles mouse click events on the game screen.
+
+        Args:
+            event (pygame.Event): The event object containing information about the mouse click.
+        """
         mouse_pos = pygame.mouse.get_pos()
         if self.input_box.collidepoint(event.pos):
             self.active = True
@@ -233,7 +276,10 @@ class WordlePygame:
 
     def handle_key_press(self, event):
         """
-        Handles key press events.
+        Handles key press events during the game.
+
+        Args:
+            event (pygame.Event): The event object containing information about the key press.
         """
         if self.active:
             if event.key == pygame.K_RETURN:
@@ -246,7 +292,10 @@ class WordlePygame:
 
     def process_guess(self):
         """
-        Processes the player's guess.
+        Processes the player's guess and updates the game state.
+
+        Validates the guess, updates the guess log, and checks the game's win/lose condition.
+        Displays messages for invalid inputs, repeated guesses, or game outcomes.
         """
         guess = self.text.lower()
         if len(guess) == self.wordle_game.wordsize:
@@ -295,6 +344,9 @@ class WordlePygame:
     def update_game_display(self):
         """
         Updates and redraws the game display.
+
+        Draws the input box, buttons, and the guess log on the screen.
+        Also updates the display with the remaining number of guesses.
         """
         self.screen.fill(BACKGROUND_COLOR)
         self.draw_buttons()
@@ -306,7 +358,9 @@ class WordlePygame:
 
     def draw_buttons(self):
         """
-        Draws buttons on the screen.
+        Draws buttons on the game screen, including the reset and main menu buttons.
+
+        Changes button colors on hover and displays button text.
         """
         mouse_pos = pygame.mouse.get_pos()
 
@@ -332,7 +386,9 @@ class WordlePygame:
 
     def draw_input_box(self):
         """
-        Draws the input box on the screen.
+        Draws the input box where the user types their guesses.
+
+        Highlights the box when active and displays the current text input.
         """
         txt_surface = FONT.render(self.text, True, TEXT_COLOR)
         # Align text in the center of the input box
@@ -347,6 +403,8 @@ class WordlePygame:
     def reset_game(self):
         """
         Resets the game to its initial state.
+
+        Creates a new instance of WordleGame with the same word size and clears the guess log.
         """
         # Reset the game logic
         self.wordle_game = WordleGame(self.wordle_game.wordsize, self.validation_cache)
@@ -357,6 +415,8 @@ class WordlePygame:
     def quit_game(self):
         """
         Quits the game and exits.
+
+        Closes the pygame window and terminates the program.
         """
         pygame.quit()
         sys.exit()
@@ -420,8 +480,8 @@ class WordlePygame:
         """
         Displays the remaining number of guesses on the game screen.
 
-        This method shows the number of guesses left for the player at the top of the screen.
-        It helps the player keep track of how many attempts they have remaining.
+        Shows the number of guesses left for the player at the top of the screen.
+        Helps the player keep track of how many attempts they have remaining.
         """
         counter_text = f"Guesses left: {self.wordle_game.guesses}"
         text_surface = FONT.render(counter_text, True, TEXT_COLOR)
@@ -479,8 +539,8 @@ class WordlePygame:
         """
         The main loop of the WordlePygame.
 
-        This method keeps the game running, updating the screen, and handling the transitions
-        between different screens (main menu, game screen) based on the game state.
+        Continuously updates the screen and handles transitions between different screens
+        (main menu, game screen) based on the game state. Ensures the game runs at a consistent frame rate.
         """
         while True:
             if self.current_screen == "main_menu":
@@ -494,6 +554,11 @@ class WordlePygame:
 
 
 def main():
+    """
+    The entry point of the Wordle game application.
+
+    Initializes a validation cache and creates an instance of WordlePygame to start the game.
+    """
     validation_cache = {}  # Initialize the cache
     game = WordlePygame(validation_cache)
     game.run()
