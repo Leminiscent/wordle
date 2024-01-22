@@ -336,10 +336,12 @@ class WordlePygame:
             self.wordle_game.guesses -= 1
 
             if score == self.wordle_game.EXACT * self.wordle_game.wordsize:
+                self.update_game_display()
                 self.display_message("You won!", 2000)
                 self.current_screen = "main_menu"
                 return
             elif self.wordle_game.guesses == 0:
+                self.update_game_display()
                 self.display_message(
                     f"The word was {self.wordle_game.choice}. You lost!", 2000
                 )
